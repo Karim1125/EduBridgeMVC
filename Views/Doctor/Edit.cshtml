@@ -1,0 +1,70 @@
+@model EduBridgeMVC.Contracts.Doctor.UpdateDoctorRequest
+
+<div class="bradcam_area breadcam_bg overlay2" style="padding: 150px 0;">
+    <h3 style="font-style: italic;">Edit Doctor</h3>
+</div>
+
+<div class="about_area" style="min-height:100vh;
+    background:linear-gradient(135deg,#f5f3ff,#ede9fe,#ddd6fe);
+    display:flex;align-items:center;justify-content:center;padding:50px 0;">
+
+    <div style="width:540px;padding:30px;border-radius:22px;
+        background:linear-gradient(135deg,#35265f,#4c1d95);
+        border:4px dashed #a855f7;
+        box-shadow:0 20px 50px rgba(91,33,182,0.35);color:white;">
+
+        <h3 style="text-align:center;margin-bottom:20px;color:#f5f3ff;font-weight:700;">Edit Doctor Profile</h3>
+
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+
+            <label style="color:#d8b4fe;">Department <span style="color:#f87171;">*</span></label>
+            <input asp-for="Department"
+                   style="width:100%;padding:10px;margin-bottom:4px;border-radius:10px;
+                   border:1px solid #7c3aed;background:transparent;color:white;outline:none;" />
+            <span asp-validation-for="Department" style="color:#f87171;font-size:13px;display:block;margin-bottom:10px;"></span>
+
+            <label style="color:#d8b4fe;">Academic Title</label>
+            <input asp-for="AcademicTitle"
+                   style="width:100%;padding:10px;margin-bottom:10px;border-radius:10px;
+                   border:1px solid #7c3aed;background:transparent;color:white;outline:none;" />
+
+            <label style="color:#d8b4fe;">Office Location</label>
+            <input asp-for="OfficeLocation"
+                   style="width:100%;padding:10px;margin-bottom:10px;border-radius:10px;
+                   border:1px solid #7c3aed;background:transparent;color:white;outline:none;" />
+
+            <label style="color:#d8b4fe;">Max Teams <span style="color:#f87171;">*</span></label>
+            <input asp-for="MaxTeams" type="number" min="1" max="20"
+                   style="width:100%;padding:10px;margin-bottom:4px;border-radius:10px;
+                   border:1px solid #7c3aed;background:transparent;color:white;outline:none;" />
+            <span asp-validation-for="MaxTeams" style="color:#f87171;font-size:13px;display:block;margin-bottom:10px;"></span>
+
+            <label style="color:#d8b4fe;">Available Teams</label>
+            <input asp-for="AvailableTeams" type="number" min="0" max="20"
+                   style="width:100%;padding:10px;margin-bottom:4px;border-radius:10px;
+                   border:1px solid #7c3aed;background:transparent;color:white;outline:none;" />
+            <span asp-validation-for="AvailableTeams" style="color:#f87171;font-size:13px;display:block;margin-bottom:20px;"></span>
+
+            <div style="display:flex;justify-content:center;gap:10px;">
+                <button type="submit"
+                        style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;
+                    padding:10px 20px;border:none;border-radius:12px;font-weight:600;cursor:pointer;
+                    transition:0.3s;box-shadow:0 8px 20px rgba(124,58,237,0.3);"
+                        onmouseover="this.style.transform='scale(1.05)'"
+                        onmouseout="this.style.transform='scale(1)'">Update</button>
+                <a asp-action="Index"
+                   style="background:transparent;color:#e9d5ff;padding:10px 20px;border-radius:12px;
+                   text-decoration:none;border:1.5px solid #a855f7;font-weight:600;transition:0.3s;"
+                   onmouseover="this.style.background='rgba(168,85,247,0.15)'"
+                   onmouseout="this.style.background='transparent'">Cancel</a>
+            </div>
+
+            <div asp-validation-summary="ModelOnly" style="color:#f87171;margin-top:15px;text-align:center;"></div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

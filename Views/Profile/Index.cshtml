@@ -1,0 +1,218 @@
+@model EduBridgeMVC.Contracts.User.UserProfileResponse
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="bradcam_area breadcam_bg overlay2" style="padding:150px 0;">
+    <h3 style="font-style:italic;">My Profile</h3>
+</div>
+
+<div class="about_area" style="min-height:100vh;
+    background:linear-gradient(135deg,#f5f3ff,#ede9fe,#ddd6fe);padding:50px 0;">
+    <div class="container">
+
+        <div id="toast" style="display:none;position:fixed;top:100px;left:50%;transform:translateX(-50%);
+            z-index:9999;color:white;padding:14px 30px;border-radius:20px;font-weight:bold;"></div>
+
+        <div class="row g-4">
+
+            <!-- LEFT: Avatar + quick info -->
+            <div class="col-xl-4 col-lg-5">
+                <div style="border-radius:22px;padding:30px;text-align:center;
+                    background:linear-gradient(135deg,#35265f,#4c1d95);
+                    border:1px solid rgba(196,181,253,0.25);
+                    box-shadow:0 12px 30px rgba(76,29,149,0.35);color:white;">
+
+                    <!-- Avatar with upload -->
+                    <div style="position:relative;display:inline-block;margin-bottom:16px;">
+                        <img id="profileAvatar" src="@(Model.ProfileImageUrl ?? "/img/default.png")"
+                             style="width:130px;height:130px;border-radius:50%;object-fit:cover;
+                             border:3px solid #c4b5fd;box-shadow:0 0 22px rgba(196,181,253,0.5);" />
+                        <label for="avatarInput" title="Change photo"
+                               style="position:absolute;bottom:2px;right:2px;background:#7c3aed;
+                               border-radius:50%;width:32px;height:32px;display:flex;
+                               align-items:center;justify-content:center;cursor:pointer;border:2px solid white;">
+                            <span style="color:white;font-size:15px;">&#9998;</span>
+                        </label>
+                        <input id="avatarInput" type="file" accept="image/*" style="display:none;"
+                               onchange="uploadAvatar(this)" />
+                    </div>
+
+                    <h4 style="margin:0;font-weight:700;color:#f5f3ff;">@Model.FirstName @Model.LastName</h4>
+
+                    @if (!string.IsNullOrEmpty(Model.Major))
+                    {
+                        <p style="color:#c4b5fd;font-size:14px;margin:4px 0;">@Model.Major</p>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.University))
+                    {
+                        <p style="color:#a78bfa;font-size:13px;margin:2px 0;">@Model.University</p>
+                    }
+
+                    <!-- Social links -->
+                    <div style="margin-top:16px;display:flex;justify-content:center;gap:12px;">
+                        @if (!string.IsNullOrEmpty(Model.GitHubUrl))
+                        {
+                            <a href="@Model.GitHubUrl" target="_blank"
+                               style="background:rgba(255,255,255,0.1);padding:8px 14px;border-radius:10px;
+                               color:#e9d5ff;text-decoration:none;font-size:13px;font-weight:500;">GitHub</a>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.LinkedInUrl))
+                        {
+                            <a href="@Model.LinkedInUrl" target="_blank"
+                               style="background:rgba(255,255,255,0.1);padding:8px 14px;border-radius:10px;
+                               color:#e9d5ff;text-decoration:none;font-size:13px;font-weight:500;">LinkedIn</a>
+                        }
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div style="margin-top:22px;display:flex;flex-direction:column;gap:10px;">
+                        <a asp-action="Edit"
+                           style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;
+                           padding:10px;border-radius:12px;text-decoration:none;font-weight:600;
+                           transition:0.25s;box-shadow:0 6px 18px rgba(124,58,237,0.35);"
+                           onmouseover="this.style.transform='translateY(-2px)'"
+                           onmouseout="this.style.transform='translateY(0)'">Edit Profile</a>
+
+                        <a asp-action="ChangePassword"
+                           style="background:transparent;color:#e9d5ff;padding:10px;border-radius:12px;
+                           text-decoration:none;border:1.5px solid #a855f7;font-weight:600;transition:0.25s;"
+                           onmouseover="this.style.background='rgba(168,85,247,0.15)'"
+                           onmouseout="this.style.background='transparent'">Change Password</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Details + skills -->
+            <div class="col-xl-8 col-lg-7">
+
+                <!-- Bio card -->
+                <div style="border-radius:22px;padding:28px;margin-bottom:22px;
+                    background:linear-gradient(135deg,#35265f,#4c1d95);
+                    border:1px solid rgba(196,181,253,0.2);
+                    box-shadow:0 12px 30px rgba(76,29,149,0.3);color:white;">
+                    <h5 style="color:#d8b4fe;font-weight:600;margin-bottom:14px;">About Me</h5>
+                    <p style="color:#e9d5ff;line-height:1.8;margin:0;">
+                        @(string.IsNullOrEmpty(Model.Bio) ? "No bio added yet." : Model.Bio)
+                    </p>
+                </div>
+
+                <!-- Skills card -->
+                <div style="border-radius:22px;padding:28px;
+                    background:linear-gradient(135deg,#35265f,#4c1d95);
+                    border:1px solid rgba(196,181,253,0.2);
+                    box-shadow:0 12px 30px rgba(76,29,149,0.3);color:white;">
+
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <h5 style="color:#d8b4fe;font-weight:600;margin:0;">Skills</h5>
+                        <button onclick="toggleAddSkill()"
+                                style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;
+                                border:none;padding:6px 14px;border-radius:10px;font-size:13px;
+                                font-weight:600;cursor:pointer;">+ Add Skill</button>
+                    </div>
+
+                    <!-- Add skill input -->
+                    <div id="addSkillBox" style="display:none;margin-bottom:14px;">
+                        <div style="display:flex;gap:8px;">
+                            <input id="newSkillInput" placeholder="e.g. Python, React, SQL..."
+                                   style="flex:1;padding:8px 12px;border-radius:10px;border:1px solid #a855f7;
+                                   background:rgba(255,255,255,0.05);color:white;outline:none;" />
+                            <button onclick="addSkill()"
+                                    style="background:#7c3aed;color:white;border:none;padding:8px 16px;
+                                    border-radius:10px;font-weight:600;cursor:pointer;">Save</button>
+                        </div>
+                        <p style="color:#9ca3af;font-size:12px;margin-top:6px;">Separate multiple skills with commas</p>
+                    </div>
+
+                    <!-- Existing skills -->
+                    <div id="skillsContainer" style="display:flex;flex-wrap:wrap;gap:8px;">
+                        @if (!Model.Skills.Any())
+                        {
+                            <p style="color:#9ca3af;font-size:14px;">No skills added yet.</p>
+                        }
+                        @foreach (var skill in Model.Skills)
+                        {
+                            <span style="background:rgba(168,85,247,0.25);color:#e9d5ff;padding:5px 14px;
+                                border-radius:20px;font-size:13px;font-weight:500;display:flex;
+                                align-items:center;gap:6px;">
+                                @skill
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success text-center mt-4">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger text-center mt-4">@TempData["Error"]</div>
+        }
+
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function uploadAvatar(input) {
+    if (!input.files || !input.files[0]) return;
+    var file = input.files[0];
+    if (!file.type.startsWith('image/')) { showToast('Please select an image', true); return; }
+    if (file.size > 5 * 1024 * 1024) { showToast('Image must be under 5MB', true); return; }
+
+    var fd = new FormData();
+    fd.append('image', file);
+    fetch('/Profile/upload-image', { method:'POST', body:fd,
+        headers:{'X-Requested-With':'XMLHttpRequest'} })
+    .then(r => r.json()).then(d => {
+        if (d.success) {
+            document.getElementById('profileAvatar').src = d.url + '?t=' + Date.now();
+            showToast('Photo updated!');
+        } else { showToast(d.message, true); }
+    }).catch(() => showToast('Upload failed', true));
+}
+
+function toggleAddSkill() {
+    var box = document.getElementById('addSkillBox');
+    box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+function addSkill() {
+    var input = document.getElementById('newSkillInput');
+    var val = input.value.trim();
+    if (!val) return;
+    var skills = val.split(',').map(s => s.trim()).filter(s => s);
+    fetch('/Profile/add-skills', {
+        method:'POST', body:JSON.stringify(skills),
+        headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'}
+    }).then(r => r.json()).then(d => {
+        if (d.success) {
+            var container = document.getElementById('skillsContainer');
+            var empty = container.querySelector('p');
+            if (empty) empty.remove();
+            skills.forEach(s => {
+                var span = document.createElement('span');
+                span.style.cssText = 'background:rgba(168,85,247,0.25);color:#e9d5ff;padding:5px 14px;border-radius:20px;font-size:13px;font-weight:500;';
+                span.textContent = s;
+                container.appendChild(span);
+            });
+            input.value = '';
+            document.getElementById('addSkillBox').style.display = 'none';
+            showToast('Skill(s) added!');
+        } else { showToast(d.message, true); }
+    });
+}
+
+function showToast(msg, isError) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.background = isError ? '#ef4444' : '#7e22ce';
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 2500);
+}
+</script>
+}

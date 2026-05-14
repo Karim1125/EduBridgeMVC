@@ -1,0 +1,105 @@
+@model EduBridgeMVC.Contracts.User.UpdateUserRequest
+
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<div class="bradcam_area breadcam_bg overlay2" style="padding:150px 0;">
+    <h3 style="font-style:italic;">Edit Profile</h3>
+</div>
+
+<div class="about_area" style="min-height:100vh;
+    background:linear-gradient(135deg,#f5f3ff,#ede9fe,#ddd6fe);
+    display:flex;align-items:center;justify-content:center;padding:50px 0;">
+
+    <div style="width:560px;border-radius:24px;padding:35px;
+        background:linear-gradient(135deg,#35265f,#4c1d95);
+        border:4px dashed #a855f7;
+        box-shadow:0 20px 50px rgba(91,33,182,0.35);color:white;">
+
+        <h3 style="text-align:center;margin-bottom:25px;color:#f5f3ff;font-weight:700;">
+            Edit Profile
+            <div style="width:60px;height:3px;background:linear-gradient(135deg,#a855f7,#c084fc);
+                margin:8px auto 0;border-radius:10px;"></div>
+        </h3>
+
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+
+            <div style="display:flex;gap:14px;margin-bottom:4px;">
+                <div style="flex:1;">
+                    <label style="color:#c4b5fd;font-size:13px;">First Name *</label>
+                    <input asp-for="FirstName"
+                           style="width:100%;padding:10px;margin-top:4px;border-radius:10px;
+                           border:1px solid #7c3aed;background:rgba(255,255,255,0.05);color:white;outline:none;" />
+                    <span asp-validation-for="FirstName" style="color:#f87171;font-size:12px;"></span>
+                </div>
+                <div style="flex:1;">
+                    <label style="color:#c4b5fd;font-size:13px;">Last Name *</label>
+                    <input asp-for="LastName"
+                           style="width:100%;padding:10px;margin-top:4px;border-radius:10px;
+                           border:1px solid #7c3aed;background:rgba(255,255,255,0.05);color:white;outline:none;" />
+                    <span asp-validation-for="LastName" style="color:#f87171;font-size:12px;"></span>
+                </div>
+            </div>
+
+            <div style="margin-top:16px;">
+                <label style="color:#c4b5fd;font-size:13px;">Bio</label>
+                <textarea asp-for="Bio" rows="3"
+                          style="width:100%;padding:10px;margin-top:4px;border-radius:10px;
+                          border:1px solid #7c3aed;background:rgba(255,255,255,0.05);color:white;
+                          outline:none;resize:vertical;"></textarea>
+            </div>
+
+            <div style="display:flex;gap:14px;margin-top:16px;">
+                <div style="flex:1;">
+                    <label style="color:#c4b5fd;font-size:13px;">Major</label>
+                    <input asp-for="Major"
+                           style="width:100%;padding:10px;margin-top:4px;border-radius:10px;
+                           border:1px solid #7c3aed;background:rgba(255,255,255,0.05);color:white;outline:none;" />
+                </div>
+                <div style="flex:1;">
+                    <label style="color:#c4b5fd;font-size:13px;">University</label>
+                    <input asp-for="University"
+                           style="width:100%;padding:10px;margin-top:4px;border-radius:10px;
+                           border:1px solid #7c3aed;background:rgba(255,255,255,0.05);color:white;outline:none;" />
+                </div>
+            </div>
+
+            <div style="margin-top:16px;">
+                <label style="color:#c4b5fd;font-size:13px;">GitHub URL</label>
+                <input asp-for="GitHubUrl"
+                       style="width:100%;padding:10px;margin-top:4px;border-radius:10px;
+                       border:1px solid #7c3aed;background:rgba(255,255,255,0.05);color:white;outline:none;" />
+            </div>
+
+            <div style="margin-top:16px;">
+                <label style="color:#c4b5fd;font-size:13px;">LinkedIn URL</label>
+                <input asp-for="LinkedInUrl"
+                       style="width:100%;padding:10px;margin-top:4px;border-radius:10px;
+                       border:1px solid #7c3aed;background:rgba(255,255,255,0.05);color:white;outline:none;" />
+            </div>
+
+            <div style="display:flex;justify-content:center;gap:12px;margin-top:28px;">
+                <button type="submit"
+                        style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;
+                    padding:11px 24px;border:none;border-radius:12px;font-weight:600;cursor:pointer;
+                    transition:0.25s;box-shadow:0 8px 20px rgba(124,58,237,0.3);"
+                        onmouseover="this.style.transform='scale(1.05)'"
+                        onmouseout="this.style.transform='scale(1)'">Save Changes</button>
+
+                <a asp-action="Index"
+                   style="background:transparent;color:#e9d5ff;padding:11px 24px;border-radius:12px;
+                   text-decoration:none;border:1.5px solid #a855f7;font-weight:600;transition:0.25s;"
+                   onmouseover="this.style.background='rgba(168,85,247,0.15)'"
+                   onmouseout="this.style.background='transparent'">Cancel</a>
+            </div>
+
+            <div asp-validation-summary="ModelOnly" style="color:#f87171;margin-top:14px;text-align:center;"></div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

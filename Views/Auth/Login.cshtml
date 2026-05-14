@@ -1,0 +1,107 @@
+@model EduBridgeMVC.Contracts.Authentication.LoginRequest
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="bradcam_area breadcam_bg overlay2" style="padding: 150px 0;">
+    <h3 style="font-style: italic;">Welcome Back To EduBridge</h3>
+</div>
+
+<div class="about_area" style="background:linear-gradient(135deg,#f5f3ff,#ddd6fe,#c4b5fd,#a78bfa);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-6 col-lg-8">
+                <div class="single_about_info p-4 shadow"
+                     style="background:#fff; border-radius:15px; border:2px dashed #a855f7">
+
+                    <h3 style="text-align:center;margin-bottom:25px;font-size:28px;font-weight:bold;
+                        background:linear-gradient(90deg,#a855f7,#d946ef,#9333ea);
+                        -webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+                        Welcome Back 👋
+                    </h3>
+
+                    <form asp-action="Login" method="post"
+                          style="max-width:520px;margin:auto;padding:35px;border-radius:25px;
+                                 background:rgba(255,255,255,0.07);backdrop-filter:blur(18px);
+                                 border:1.5px solid rgba(168,85,247,0.4);
+                                 box-shadow:0 0 25px rgba(168,85,247,0.25);color:#6b21a8;">
+
+                        @Html.AntiForgeryToken()
+
+                        <!-- Email -->
+                        <div style="margin-top:20px;">
+                            <input asp-for="Email" placeholder="Email"
+                                   onfocus="this.style.borderBottom='2px solid #a855f7'"
+                                   onblur="this.style.borderBottom='2px solid #7e22ce'"
+                                   style="width:100%;border:none;border-bottom:2px solid #7e22ce;
+                                          background:transparent;padding:10px;outline:none;color:#6b21a8;"
+                                   class="form-control" />
+                            <span asp-validation-for="Email" style="color:#dc2626;font-size:12px;"></span>
+                        </div>
+
+                        <!-- Password -->
+                        <div style="margin-top:20px;">
+                            <input asp-for="Password" type="password" placeholder="Password"
+                                   onfocus="this.style.borderBottom='2px solid #a855f7'"
+                                   onblur="this.style.borderBottom='2px solid #7e22ce'"
+                                   style="width:100%;border:none;border-bottom:2px solid #7e22ce;
+                                          background:transparent;padding:10px;outline:none;color:#6b21a8;"
+                                   class="form-control" />
+                            <span asp-validation-for="Password" style="color:#dc2626;font-size:12px;"></span>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit"
+                                onmouseover="this.style.transform='scale(1.05)'"
+                                onmouseout="this.style.transform='scale(1)'"
+                                style="width:100%;margin-top:30px;padding:13px;border:none;
+                                       border-radius:14px;font-weight:bold;cursor:pointer;
+                                       background:linear-gradient(90deg,#7e22ce,#a855f7,#9333ea);
+                                       color:white;transition:0.2s;">
+                            Login
+                        </button>
+
+                        <!-- Links -->
+                        <div style="text-align:center;margin-top:18px;">
+                            <a asp-action="ForgetPassword"
+                               style="background:linear-gradient(90deg,#a855f7,#d946ef,#9333ea);
+                                      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+                                      font-weight:bold;text-decoration:none;">
+                                Forgot Password?
+                            </a>
+                        </div>
+                        <div class="text-center mt-2">
+                            <a asp-action="ResendConfirmation"
+                               style="background:linear-gradient(90deg,#a855f7,#d946ef,#9333ea);
+                                      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+                                      font-weight:bold;text-decoration:none;">
+                                Resend Confirmation Email
+                            </a>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a asp-action="Register"
+                               style="background:linear-gradient(90deg,#a855f7,#d946ef,#9333ea);
+                                      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+                                      font-weight:bold;text-decoration:none;">
+                                Create Account
+                            </a>
+                        </div>
+
+                        <!-- Server-side errors -->
+                        <div asp-validation-summary="All" class="text-danger mt-3"></div>
+
+                        @if (TempData["Success"] != null)
+                        {
+                            <p class="text-success text-center mt-2">@TempData["Success"]</p>
+                        }
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

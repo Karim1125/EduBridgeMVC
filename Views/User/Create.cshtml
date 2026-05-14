@@ -1,0 +1,81 @@
+@model EduBridgeMVC.Contracts.User.CreateUserRequest
+
+<div class="bradcam_area breadcam_bg overlay2 text-center" style="padding:150px 0;">
+    <h3 style="color:white;font-weight:600;margin:0;font-style:italic;">Create User</h3>
+</div>
+
+<div class="about_area" style="min-height:100vh;
+    background:linear-gradient(135deg,#f5f3ff,#ede9fe,#ddd6fe);
+    display:flex;align-items:center;justify-content:center;padding:40px 0;">
+
+    <div style="width:520px;padding:30px;border-radius:22px;
+        background:linear-gradient(135deg,#3a2a5e,#4c1d95);
+        border:4px dashed #a855f7;
+        box-shadow:0 15px 35px rgba(91,33,182,0.35);color:white;transition:0.3s;">
+
+        <h3 style="text-align:center;margin-bottom:25px;font-size:22px;font-weight:700;color:#f5f3ff;">
+            Create User
+            <div style="width:60px;height:3px;background:linear-gradient(135deg,#a855f7,#c084fc);
+                margin:8px auto 0;border-radius:10px;box-shadow:0 0 10px rgba(168,85,247,0.5);"></div>
+        </h3>
+
+        <form asp-action="Create" method="post" id="createUserForm">
+            @Html.AntiForgeryToken()
+
+            <label style="color:#c4b5fd;">First Name <span style="color:#f87171;">*</span></label>
+            <input asp-for="FirstName" id="FirstName"
+                   style="width:100%;padding:10px;margin-bottom:4px;border-radius:10px;
+                   border:1px solid #7c3aed;background:transparent;color:white;outline:none;" />
+            <span asp-validation-for="FirstName" style="color:#f87171;font-size:13px;display:block;margin-bottom:10px;"></span>
+
+            <label style="color:#c4b5fd;">Last Name <span style="color:#f87171;">*</span></label>
+            <input asp-for="LastName" id="LastName"
+                   style="width:100%;padding:10px;margin-bottom:4px;border-radius:10px;
+                   border:1px solid #7c3aed;background:transparent;color:white;outline:none;" />
+            <span asp-validation-for="LastName" style="color:#f87171;font-size:13px;display:block;margin-bottom:10px;"></span>
+
+            <label style="color:#c4b5fd;">Email <span style="color:#f87171;">*</span></label>
+            <input asp-for="Email" id="Email" type="email"
+                   style="width:100%;padding:10px;margin-bottom:4px;border-radius:10px;
+                   border:1px solid #7c3aed;background:transparent;color:white;outline:none;" />
+            <span asp-validation-for="Email" style="color:#f87171;font-size:13px;display:block;margin-bottom:10px;"></span>
+
+            <label style="color:#c4b5fd;">Password <span style="color:#f87171;">*</span></label>
+            <input asp-for="Password" id="Password" type="password"
+                   style="width:100%;padding:10px;margin-bottom:4px;border-radius:10px;
+                   border:1px solid #7c3aed;background:transparent;color:white;outline:none;" />
+            <span asp-validation-for="Password" style="color:#f87171;font-size:13px;display:block;margin-bottom:10px;"></span>
+
+            <label style="color:#c4b5fd;">Confirm Password <span style="color:#f87171;">*</span></label>
+            <input asp-for="ConfirmPassword" id="ConfirmPassword" type="password"
+                   style="width:100%;padding:10px;margin-bottom:4px;border-radius:10px;
+                   border:1px solid #7c3aed;background:transparent;color:white;outline:none;" />
+            <span asp-validation-for="ConfirmPassword" style="color:#f87171;font-size:13px;display:block;margin-bottom:10px;"></span>
+
+            <label style="color:#c4b5fd;">Role <span style="color:#f87171;">*</span></label>
+            <select asp-for="Role" id="Role"
+                    style="width:100%;padding:10px;margin-bottom:18px;border-radius:10px;
+                    border:1px solid #7c3aed;background:#3a2a5e;color:white;outline:none;">
+                <option value="">-- Select Role --</option>
+                <option value="Student">Student</option>
+                <option value="TA">TA</option>
+                <option value="Admin">Admin</option>
+            </select>
+            <span asp-validation-for="Role" style="color:#f87171;font-size:13px;display:block;margin-bottom:10px;"></span>
+
+            <button type="submit"
+                    style="width:100%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;
+                    padding:12px;border:none;border-radius:12px;font-weight:600;cursor:pointer;transition:0.3s;"
+                    onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 10px 25px rgba(124,58,237,0.5)'"
+                    onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">
+                Create
+            </button>
+
+            <div asp-validation-summary="ModelOnly" style="color:#f87171;margin-top:15px;text-align:center;"></div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

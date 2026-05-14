@@ -1,0 +1,224 @@
+﻿@{
+    var isAuth = User.Identity!.IsAuthenticated;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>@ViewData["Title"] - EduBridge</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" type="image/x-icon" href="~/img/favicon.png">
+
+    <link rel="stylesheet" href="~/css/bootstrap.min.css">
+    <link rel="stylesheet" href="~/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="~/css/magnific-popup.css">
+    <link rel="stylesheet" href="~/css/font-awesome.min.css">
+    <link rel="stylesheet" href="~/css/themify-icons.css">
+    <link rel="stylesheet" href="~/css/nice-select.css">
+    <link rel="stylesheet" href="~/css/flaticon.css">
+    <link rel="stylesheet" href="~/css/gijgo.css">
+    <link rel="stylesheet" href="~/css/animate.css">
+    <link rel="stylesheet" href="~/css/slicknav.css">
+    <link rel="stylesheet" href="~/css/style.css">
+
+    <style>
+        /* يمنع تكرار المينيو تحت */
+        .slicknav_menu {
+            display: none !important;
+        }
+        /* Reduce nav link font size to prevent wrapping when Admin links show */
+        #navigation li a {
+            font-size: 14px !important;
+        }
+        .login-btn {
+            background: #2e0344;
+            border: 2px dotted #6954c4;
+            border-radius: 25px;
+            color: white;
+            padding: 9px 35px;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            transition: 0.3s ease;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+            margin-right: 15px;
+                }
+
+        .login-btn:hover {
+            background: transparent;
+            border: 2px solid #a855f7;
+            color: #e9d5ff;
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 12px 30px rgba(168, 85, 247, 0.4);
+                }
+        .logout-btn {
+            background: #4c1d95;
+            border: 2px solid #a855f7;
+            color: #f5f3ff;
+            border-radius: 25px;
+            padding: 10px 30px;
+            font-weight: bold;
+            font-size: 18px;
+            transition: 0.3s;
+            margin-right:15px
+                }
+
+        .logout-btn:hover {
+            background: transparent;
+            border: 2px dotted #c084fc;
+            color: #e9d5ff;
+            box-shadow: 0 12px 30px rgba(168, 85, 247, 0.4);
+            transform: translateY(-3px);
+        }
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="header-area">
+        <div id="sticky-header" class="main-header-area">
+            <div class="container-fluid p-0">
+                <div class="row align-items-center no-gutters">
+
+                    <div class="col-xl-2 col-lg-2">
+                        <div class="logo-img">
+                            <a asp-controller="Home" asp-action="Index">
+                                <h3 style="color:white;">EduBridge</h3>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-7 col-lg-7">
+                        <div class="main-menu d-none d-lg-block">
+                            <nav>
+                                <ul id="navigation" style="white-space:nowrap; flex-wrap:nowrap; display:flex; align-items:center; gap:0;">
+
+                                    <li><a asp-controller="Home" asp-action="Index">Home</a></li>
+                                    <li><a asp-controller="Team" asp-action="Index">Teams</a></li>
+                                    <li><a asp-controller="Library" asp-action="Index">Library</a></li>
+                                    <li><a asp-controller="Search" asp-action="Index">Search</a></li>
+                                    <li><a asp-controller="Request" asp-action="Index">Requests</a></li>
+                                    <li><a asp-controller="Profile" asp-action="Index">Profile</a></li>
+
+                                    @if (isAuth && (User.IsInRole("TA") || User.IsInRole("Admin")))
+                                    {
+                                        <li><a asp-controller="Ta" asp-action="Index">TAs</a></li>
+                                    }
+
+                                    @if (isAuth && (User.IsInRole("Doctor") || User.IsInRole("Admin")))
+                                    {
+                                        <li><a asp-controller="Doctor" asp-action="Index">Doctors</a></li>
+                                    }
+
+                                    @if (isAuth && User.IsInRole("Admin"))
+                                    {
+                                        <li><a asp-controller="User" asp-action="Index" style="white-space:nowrap;">Users</a></li>
+                                    }
+
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-lg-3 d-none d-lg-block">
+                        <div class="log_chat_area d-flex align-items-center">
+
+                            @if (isAuth)
+                            {
+                                <a asp-controller="Auth" asp-action="Logout" class="logout-btn ">Logout</a>
+                            }
+                            else
+                            {
+                                                                                    <a asp-controller="Auth" asp-action="Login" class="login-btn">
+                                                                                        Login
+                                                                                    </a>
+                            }
+
+                            <div class="live_chat_btn">
+                                <a class="boxed_btn_orange" href="#">
+                                    <i class="fa fa-envelope"></i>
+                                    <span>Contact</span>
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ❌ شيلنا الموبايل menu اللي كان بيكرر Users -->
+                    <!-- <div class="col-12">
+                        <div class="mobile_menu d-block d-lg-none"></div>
+                    </div> -->
+
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main>
+
+    @if (TempData["Success"] != null)
+    {
+        <div id="toast-success"
+             style="position:fixed;top:100px;left:50%;transform:translateX(-50%);
+                    z-index:9999;background:#7e22ce;color:white;
+                    padding:14px 30px;border-radius:20px;font-weight:bold;">
+            @TempData["Success"]
+        </div>
+
+        <script>
+            setTimeout(() => {
+                var el = document.getElementById("toast-success");
+                if (el) el.remove();
+            }, 2000);
+        </script>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="container mt-3">
+            <div class="alert alert-danger text-center">
+                @TempData["Error"]
+            </div>
+        </div>
+    }
+
+    @RenderBody()
+
+</main>
+
+<footer class="footer footer_bg_1">
+    <div class="copy-right_text text-center" style="padding:30px 0; font-weight:600;">
+        <p style="color:white; font-size:30px;">© 2026 EduBridge. All rights reserved.</p>
+    </div>
+</footer>
+
+<script src="~/js/vendor/jquery-1.12.4.min.js"></script>
+<script src="~/js/popper.min.js"></script>
+<script src="~/js/bootstrap.min.js"></script>
+<script src="~/js/owl.carousel.min.js"></script>
+<script src="~/js/isotope.pkgd.min.js"></script>
+<script src="~/js/ajax-form.js"></script>
+<script src="~/js/waypoints.min.js"></script>
+<script src="~/js/jquery.counterup.min.js"></script>
+<script src="~/js/imagesloaded.pkgd.min.js"></script>
+<script src="~/js/scrollIt.js"></script>
+<script src="~/js/jquery.scrollUp.min.js"></script>
+<script src="~/js/wow.min.js"></script>
+<script src="~/js/nice-select.min.js"></script>
+<script src="~/js/jquery.slicknav.min.js"></script>
+<script src="~/js/jquery.magnific-popup.min.js"></script>
+<script src="~/js/plugins.js"></script>
+<script src="~/js/gijgo.min.js"></script>
+<script src="~/js/contact.js"></script>
+<script src="~/js/main.js"></script>
+
+@await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

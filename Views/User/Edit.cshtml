@@ -1,0 +1,73 @@
+@model EduBridgeMVC.Contracts.User.UpdateUserRequest
+
+<div class="bradcam_area breadcam_bg overlay2" style="padding: 150px 0;">
+    <h3 style="font-style: italic;">Edit User</h3>
+</div>
+
+<div class="about_area" style="min-height:80vh;
+    background:linear-gradient(135deg,#f5f3ff,#ddd6fe,#c4b5fd,#a78bfa);
+    display:flex; align-items:center; justify-content:center;">
+
+    <div style="width:520px;
+        padding:30px;
+        border-radius:25px;
+        background: linear-gradient(135deg,#35265f,#4a2a84,#5b21b6);
+        backdrop-filter: blur(12px);
+        border:5px dotted #a78bfa;
+        box-shadow:0 20px 40px rgba(124,58,237,0.3);
+        color:white;">
+
+        <h3 style="text-align:center; color:#F5F5F5; margin-bottom:20px; font-size:28px; font-weight:700;">
+            Edit User
+        </h3>
+
+        <form asp-action="Edit" method="post">
+
+            <label style="color:#C4B5FD; font-weight:600;">First Name</label>
+            <input asp-for="FirstName" style="width:100%;
+                padding:10px;
+                margin-bottom:5px;
+                border-radius:10px;
+                border:1px solid #7C3AED;
+                background:transparent;
+                color:white;
+                outline:none;">
+            <span asp-validation-for="FirstName" style="color:#f87171; font-size:13px; display:block; margin-bottom:10px;"></span>
+
+                <label style="color:#C4B5FD; font-weight:600;">Last Name</label>
+                <input asp-for="LastName" style="width:100%;
+                    padding:10px;
+                    margin-bottom:5px;
+                    border-radius:10px;
+                    border:1px solid #7C3AED;
+                    background:transparent;
+                    color:white;
+                    outline:none;">
+                <span asp-validation-for="LastName" style="color:#f87171; font-size:13px; display:block; margin-bottom:15px;"></span>
+
+                    <!-- Button -->
+                    <button type="submit" style="width:100%;
+                        background:linear-gradient(135deg,#7C3AED,#C084FC);
+                        color:white;
+                        padding:12px;
+                        border:none;
+                        border-radius:12px;
+                        font-weight:600;
+                        cursor:pointer;
+                        transition:0.3s;"
+                            onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 10px 25px rgba(124,58,237,0.5)'"
+                            onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">
+                        Update
+                    </button>
+
+                    <div asp-validation-summary="All" style="color:#f87171; margin-top:15px; text-align:center;">
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

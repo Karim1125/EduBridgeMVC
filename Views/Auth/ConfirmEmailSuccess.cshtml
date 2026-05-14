@@ -1,0 +1,42 @@
+@{
+    ViewData["Title"] = "Email Confirmed";
+}
+@{
+    Layout = null;
+}
+    <div class="container d-flex justify-content-center align-items-center" style="background:linear-gradient(135deg,#ede9fe,#f5f3ff); min-height:100vh; display:flex; align-items:center; justify-content:center;">
+
+    <div class="card shadow-lg p-4" style="max-width:400px; width:100%; padding:40px; border-radius:25px; background: rgba(255,255,255,0.4); border:2px dashed #7e22ce; backdrop-filter: blur(20px); box-shadow:0 10px 40px rgba(139,92,246,0.2); position:relative; overflow:hidden;">
+        <h3 style="
+    text-align:center;
+    margin-bottom:25px;
+    font-size:28px;
+    font-weight:bold;
+    background: linear-gradient(90deg,#a855f7,#d946ef,#9333ea);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+">
+     Email Confirmed ✅</h3>
+
+        <p class="text-center" style="color:#6b21a8;">
+            Your account has been successfully activated.
+        </p>
+        <div style="text-align:center; margin-top:18px;">
+        <span style="color:#6b21a8;">Back To</span>
+        <a asp-controller="Auth" asp-action="Login"
+           style="
+             background: linear-gradient(90deg,#a855f7,#d946ef,#9333ea);
+             -webkit-background-clip:text;
+             -webkit-text-fill-color:transparent;
+             font-weight:bold;
+             text-decoration:none;
+           ">
+            Login
+        </a>
+        <span style="color:#6b21a8;">Page</span>
+    </div>
+
+    </div>
+
+</div>
+</div>

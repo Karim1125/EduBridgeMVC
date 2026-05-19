@@ -13,4 +13,9 @@ public static class IdeaCategoryErrors
         "IdeaCategory.DuplicateName",
         "A category with the same name already exists.",
         StatusCodes.Status409Conflict);
+
+    public static readonly Error CategoryInUse = new(
+        "IdeaCategory.InUse",
+        "This category cannot be deleted because it is used by one or more ideas.",
+        StatusCodes.Status409Conflict);
 }

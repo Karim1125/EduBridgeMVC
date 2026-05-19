@@ -5,12 +5,15 @@ using EduBridgeMVC.Contracts.Authentication;
 using EduBridgeMVC.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using LoginRequest = Microsoft.AspNetCore.Identity.Data.LoginRequest;
 
 namespace EduBridgeMVC.Controllers;
 
 [Route("[controller]")]
-public class AuthController(IAuthService authService, ITaService taService, ILogger<AuthController> logger) : Controller
+public class AuthController(
+    IAuthService authService,
+    ITaService taService,
+    ILogger<AuthController> logger
+) : Controller
 {
     private readonly IAuthService _authService = authService;
     private readonly ITaService _taService = taService;
@@ -26,12 +29,19 @@ public class AuthController(IAuthService authService, ITaService taService, ILog
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Login(
+        LoginRequest request,
+        CancellationToken cancellationToken
+    )
     {
         if (!ModelState.IsValid)
             return View(request);
 
-        var result = await _authService.GetTokenAsync(request.Email, request.Password, cancellationToken);
+        var result = await _authService.GetTokenAsync(
+            request.Email,
+            request.Password,
+            cancellationToken
+        );
 
         if (!result.IsSuccess)
         {
@@ -54,10 +64,9 @@ public class AuthController(IAuthService authService, ITaService taService, ILog
 
         if (role == "TA")
         {
-            var userId = jwt.Claims.FirstOrDefault(c =>
-             c.Type == ClaimTypes.NameIdentifier ||
-             c.Type == "sub"
-         )?.Value;
+            var userId = jwt
+                .Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier || c.Type == "sub")
+                ?.Value;
             var tasResult = await _taService.GetAllTAsAsync();
 
             if (!tasResult.IsSuccess)
@@ -92,7 +101,10 @@ public class AuthController(IAuthService authService, ITaService taService, ILog
 
     [HttpPost("register")]
     [DisableRateLimiting]
-    public async Task<IActionResult> Register(RegisterRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Register(
+        RegisterRequest request,
+        CancellationToken cancellationToken
+    )
     {
         if (!ModelState.IsValid)
             return View(request);
@@ -152,7 +164,10 @@ public class AuthController(IAuthService authService, ITaService taService, ILog
     }
 
     [HttpPost("reset-password")]
-    public async Task<IActionResult> ResetPassword(ResetPasswordRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> ResetPassword(
+        ResetPasswordRequest request,
+        CancellationToken cancellationToken
+    )
     {
         if (!ModelState.IsValid)
             return View(request);

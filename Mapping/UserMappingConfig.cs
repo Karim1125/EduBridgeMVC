@@ -13,7 +13,7 @@ public class UserMappingConfig : IRegister
             .Map(dest => dest.Skills,
                 src => src.Skills
                     .Where(s => true)
-                    .Select(s => s.Skill.Name));
+                    .Select(s => new SkillResponse(s.Skill.Id, s.Skill.Name)));
 
         config.NewConfig<ApplicationUser, UserResponse>()
             .Map(dest => dest.Role, src => string.Empty) // role set manually after mapping

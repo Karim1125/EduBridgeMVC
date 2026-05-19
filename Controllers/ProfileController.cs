@@ -8,7 +8,7 @@ namespace EduBridgeMVC.Controllers;
 
 [Authorize]
 [Route("[controller]")]
-public class ProfileController(IUserService userService) : Controller
+public class ProfileController(IUserService userService, ISkillService skillService) : Controller
 {
     // GET /Profile  — the "Profile" nav tab
     [HttpGet("")]
@@ -16,6 +16,8 @@ public class ProfileController(IUserService userService) : Controller
     {
         var userId = User.GetUserId()!;
         var result = await userService.GetCurrentUserAsync(userId, cancellationToken);
+        var skillsResult = await skillService.GetAllAsync(cancellationToken);
+        ViewBag.AllSkills = skillsResult.IsSuccess ? skillsResult.Value : [];
 
         if (!result.IsSuccess)
         {

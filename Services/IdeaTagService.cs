@@ -42,10 +42,18 @@ public class IdeaTagService(
         name = name.Trim().ToLowerInvariant();
 
         var existing = await context.IdeaTags
+            .IgnoreQueryFilters()
             .FirstOrDefaultAsync(t => t.Name == name && t.CategoryId == categoryId, cancellationToken);
 
-        if (existing is not null)
+        if (existing is not null && !existing.IsDeleted)
             return Result.Success(existing.Id);
+
+        if (existing is not null)
+        {
+            existing.IsDeleted = false;
+            await context.SaveChangesAsync(cancellationToken);
+            return Result.Success(existing.Id);
+        }
 
         try
         {
@@ -57,9 +65,19 @@ public class IdeaTagService(
         catch (DbUpdateException)
         {
             var tag = await context.IdeaTags
+                .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(t => t.Name == name && t.CategoryId == categoryId, cancellationToken);
 
-            return Result.Success(tag!.Id);
+            if (tag is null)
+                return Result.Failure<Guid>(IdeaTagErrors.DuplicateTagName);
+
+            if (tag.IsDeleted)
+            {
+                tag.IsDeleted = false;
+                await context.SaveChangesAsync(cancellationToken);
+            }
+
+            return Result.Success(tag.Id);
         }
     }
 
@@ -77,6 +95,7 @@ public class IdeaTagService(
         var normalizedName = request.Name?.Trim().ToLowerInvariant() ?? tag.Name;
 
         var nameExists = await context.IdeaTags
+            .IgnoreQueryFilters()
             .AnyAsync(t => t.Name == normalizedName && t.CategoryId == targetCategoryId && t.Id != id,
                 cancellationToken);
 

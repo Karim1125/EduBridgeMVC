@@ -1,0 +1,73 @@
+@model EduBridgeMVC.Contracts.Idea.IdeaResponse
+@{
+    var canManageIdea = ViewBag.CanManageIdea as bool? == true;
+}
+
+<div class="bradcam_area breadcam_bg overlay2" style="padding: 150px 0;">
+    <h3 style="font-style: italic;">@Model.Title</h3>
+</div>
+
+<div class="about_area" style="min-height:100vh;
+    background:linear-gradient(135deg,#f5f3ff,#ede9fe,#ddd6fe);
+    display:flex;align-items:center;justify-content:center;padding:40px 0;">
+
+    <div style="width:640px;padding:30px;border-radius:22px;
+        background:linear-gradient(135deg,#3a2a5e,#4c1d95);
+        border:2px solid #a855f7;
+        box-shadow:0 15px 35px rgba(91,33,182,0.35);color:white;transition:0.3s;">
+
+        <h3 style="text-align:center;margin-bottom:25px;font-size:24px;font-weight:700;color:#f5f3ff;">
+            @Model.Title
+        </h3>
+
+        <div style="margin-bottom:20px;padding:15px;border-radius:12px;background:rgba(196,181,253,0.1);border:1px solid rgba(196,181,253,0.25);">
+            <p style="margin:0;color:#c4b5fd;font-size:15px;line-height:1.6;">@Model.Description</p>
+        </div>
+
+        <div style="margin-bottom:20px;">
+            <label style="color:#c4b5fd;font-size:14px;font-weight:600;">Category</label>
+            <p style="margin:5px 0;color:#f5f3ff;font-size:15px;">@Model.CategoryName</p>
+        </div>
+
+        @if (Model.Tags != null && Model.Tags.Any())
+        {
+            <div style="margin-bottom:20px;">
+                <label style="color:#c4b5fd;font-size:14px;font-weight:600;">Tags</label>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                    @foreach (var tag in Model.Tags)
+                    {
+                        <span style="display:inline-block;padding:5px 12px;border-radius:10px;
+                            background:rgba(168,85,247,0.2);color:#e9d5ff;font-size:13px;">#@tag.Name</span>
+                    }
+                </div>
+            </div>
+        }
+
+        <div style="margin-bottom:20px;">
+            <label style="color:#c4b5fd;font-size:14px;font-weight:600;">Team</label>
+            <p style="margin:5px 0;color:#f5f3ff;font-size:15px;">@Model.TeamName</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.RepositoryUrl))
+        {
+            <div style="margin-bottom:20px;">
+                <label style="color:#c4b5fd;font-size:14px;font-weight:600;">Repository</label>
+                <a href="@Model.RepositoryUrl" target="_blank"
+                   style="color:#a855f7;text-decoration:none;font-weight:500;">@Model.RepositoryUrl</a>
+            </div>
+        }
+
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:25px;padding-top:20px;border-top:1px solid rgba(196,181,253,0.1);">
+            <a asp-action="Index"
+               style="background:linear-gradient(135deg,#64748b,#475569);color:white;
+                padding:10px 20px;border-radius:10px;text-decoration:none;font-weight:600;">Back</a>
+
+            @if (canManageIdea)
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id"
+                   style="background:linear-gradient(135deg,#0ea5e9,#06b6d4);color:white;
+                    padding:10px 20px;border-radius:10px;text-decoration:none;font-weight:600;">Edit</a>
+            }
+        </div>
+    </div>
+</div>

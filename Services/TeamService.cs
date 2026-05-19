@@ -52,6 +52,22 @@ public class TeamService(
         return Result.Success(mapper.Map<IEnumerable<TeamResponse>>(teams));
     }
 
+    public async Task<Result<TeamResponse>> GetByLeadAsync(
+        string userId, CancellationToken cancellationToken = default)
+    {
+        var team = await context.Teams
+            .AsNoTracking()
+            .Include(t => t.Members)
+            .Include(t => t.Leader)
+            .Include(t => t.Ta).ThenInclude(ta => ta!.User)
+            .Include(t => t.Doctor).ThenInclude(d => d!.User)
+            .FirstOrDefaultAsync(t => t.LeaderId == userId, cancellationToken);
+
+        return team is null
+            ? Result.Failure<TeamResponse>(TeamErrors.TeamNotFound)
+            : Result.Success(mapper.Map<TeamResponse>(team));
+    }
+
     public async Task<Result<TeamResponse>> CreateAsync(
         CreateTeamRequest request, CancellationToken cancellationToken = default)
     {

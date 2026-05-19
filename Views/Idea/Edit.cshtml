@@ -1,0 +1,100 @@
+@model EduBridgeMVC.Contracts.Idea.UpdateIdeaRequest
+
+<div class="bradcam_area breadcam_bg overlay2" style="padding:150px 0;">
+    <h3 style="font-style: italic;">Edit Idea</h3>
+</div>
+
+<div class="about_area" style="min-height:100vh;
+    background:linear-gradient(135deg,#f5f3ff,#ede9fe,#ddd6fe);
+    display:flex;align-items:center;justify-content:center;padding:40px 0;">
+
+    <div style="width:540px;padding:30px;border-radius:22px;
+        background:linear-gradient(135deg,#3a2a5e,#4c1d95);
+        border:4px dashed #a855f7;
+        box-shadow:0 15px 35px rgba(91,33,182,0.35);color:white;transition:0.3s;">
+
+        <h3 style="text-align:center;margin-bottom:25px;font-size:22px;font-weight:700;color:#f5f3ff;">
+            Edit Idea
+            <div style="width:60px;height:3px;background:linear-gradient(135deg,#a855f7,#c084fc);
+                margin:8px auto 0;border-radius:10px;box-shadow:0 0 10px rgba(168,85,247,0.5);"></div>
+        </h3>
+
+        <form asp-action="Edit" method="post">
+            @Html.AntiForgeryToken()
+
+            <label style="color:#c4b5fd;">Title <span style="color:#f87171;">*</span></label>
+            <input asp-for="Title"
+                   style="width:100%;padding:10px;margin-bottom:4px;border-radius:10px;
+                   border:1px solid #7c3aed;background:transparent;color:white;outline:none;" />
+            <span asp-validation-for="Title" style="color:#f87171;font-size:13px;display:block;margin-bottom:10px;"></span>
+
+            <label style="color:#c4b5fd;">Description <span style="color:#f87171;">*</span></label>
+            <textarea asp-for="Description" rows="4"
+                      style="width:100%;padding:10px;margin-bottom:4px;border-radius:10px;
+                      border:1px solid #7c3aed;background:transparent;color:white;outline:none;resize:vertical;"></textarea>
+            <span asp-validation-for="Description" style="color:#f87171;font-size:13px;display:block;margin-bottom:10px;"></span>
+
+            <label style="color:#c4b5fd;">Category <span style="color:#f87171;">*</span></label>
+            <select asp-for="CategoryId"
+                    style="width:100%;padding:10px;margin-bottom:4px;border-radius:10px;
+                    border:1px solid #7c3aed;background:#1e293b;color:white;outline:none;">
+                <option value="">-- Select Category --</option>
+                @foreach (var cat in (IEnumerable<EduBridgeMVC.Contracts.Idea.IdeaCategoryResponse>)ViewBag.Categories ?? [])
+                {
+                    <option value="@cat.Id">@cat.Name</option>
+                }
+            </select>
+            <span asp-validation-for="CategoryId" style="color:#f87171;font-size:13px;display:block;margin-bottom:10px;"></span>
+
+            <label style="color:#c4b5fd;">Repository URL</label>
+            <input asp-for="RepositoryUrl"
+                   style="width:100%;padding:10px;margin-bottom:10px;border-radius:10px;
+                   border:1px solid #7c3aed;background:transparent;color:white;outline:none;" />
+
+            <label style="color:#c4b5fd;">Tags (comma-separated)</label>
+            <input type="text" id="tagsInput"
+                   value="@(Model.Tags != null ? string.Join(", ", Model.Tags) : "")"
+                   style="width:100%;padding:10px;margin-bottom:10px;border-radius:10px;
+                   border:1px solid #7c3aed;background:transparent;color:white;outline:none;"
+                   placeholder="e.g. AI, Machine Learning, Python" />
+            <div id="tagsHiddenInputs"></div>
+
+            <button type="submit"
+                    style="width:100%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;
+                    padding:12px;border:none;border-radius:12px;font-weight:600;cursor:pointer;transition:0.3s;margin-top:10px;"
+                    onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 10px 25px rgba(124,58,237,0.5)'"
+                    onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='none'">
+                Update Idea
+            </button>
+
+            <a asp-action="Details" asp-route-id="@ViewContext.RouteData.Values["id"]"
+               style="display:block;text-align:center;margin-top:10px;color:#a855f7;text-decoration:none;font-weight:600;transition:0.3s;"
+               onmouseover="this.style.opacity='0.8'"
+               onmouseout="this.style.opacity='1'">Cancel</a>
+
+            <div asp-validation-summary="ModelOnly" style="color:#f87171;margin-top:15px;text-align:center;"></div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+        document.querySelector('form').addEventListener('submit', function() {
+            var tags = document.getElementById('tagsInput').value
+                .split(',')
+                .map(t => t.trim())
+                .filter(t => t.length > 0);
+            var container = document.getElementById('tagsHiddenInputs');
+            container.innerHTML = '';
+
+            tags.forEach(function(tag) {
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'Tags';
+                input.value = tag;
+                container.appendChild(input);
+            });
+        });
+    </script>
+}

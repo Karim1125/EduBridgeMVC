@@ -10,7 +10,7 @@ public class IdeaMappingConfig : IRegister
     {
         config.NewConfig<Idea, IdeaResponse>()
             .Map(dest => dest.CategoryName, src => src.Category.Name)
-            .Map(dest => dest.Tags, src => src.Tags.Select(t => t.Name))
+            .Map(dest => dest.Tags, src => src.Tags.Select(t => new IdeaTagDto(t.Id, t.Name)))
             .Map(dest => dest.TeamName, src => src.Team.Name);
     }
 }

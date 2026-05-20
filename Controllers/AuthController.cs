@@ -101,7 +101,7 @@ public class AuthController(
         }
 
         if (role == "Admin")
-            return RedirectToAction("Index", "User");
+            return RedirectToAction("Index", "Home");
 
         if (role == "Doctor")
             return RedirectToAction("Index", "Doctor");

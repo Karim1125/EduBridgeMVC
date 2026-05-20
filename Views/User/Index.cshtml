@@ -13,9 +13,17 @@
             z-index:9999;background:#7e22ce;color:white;
             padding:14px 30px;border-radius:20px;font-weight:bold;"></div>
 
-        @if (User.IsInRole("Admin"))
-        {
-            <div style="text-align:right; margin-bottom:24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap;">
+            <a asp-action="Students"
+               style="background:transparent;color:#4c1d95;padding:10px 22px;border-radius:14px;
+               text-decoration:none;font-weight:700;border:1.5px solid #7c3aed;transition:0.25s;"
+               onmouseover="this.style.background='rgba(124,58,237,0.12)'"
+               onmouseout="this.style.background='transparent'">
+                All Students
+            </a>
+
+            @if (User.IsInRole("Admin"))
+            {
                 <a asp-action="Create"
                    style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;
                    padding:11px 26px;border-radius:14px;text-decoration:none;font-weight:600;
@@ -25,8 +33,8 @@
                    onmouseout="this.style.transform='translateY(0)'">
                     ＋ Add User
                 </a>
-            </div>
-        }
+            }
+        </div>
 
         <div class="row mt-4">
             @foreach (var user in Model)

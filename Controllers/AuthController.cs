@@ -16,11 +16,6 @@ public class AuthController(
     ITaService taService,
     IValidator<RegisterRequest> registerValidator,
     ILogger<AuthController> logger) : Controller
-public class AuthController(
-    IAuthService authService,
-    ITaService taService,
-    ILogger<AuthController> logger
-) : Controller
 {
     private readonly IAuthService _authService = authService;
     private readonly ITaService _taService = taService;
@@ -129,9 +124,8 @@ public class AuthController(
 
     [HttpPost("register")]
     [DisableRateLimiting]
-    public async Task<IActionResult> Register([AutoValidateNever] RegisterRequest request, CancellationToken cancellationToken)
     public async Task<IActionResult> Register(
-        RegisterRequest request,
+        [AutoValidateNever] RegisterRequest request,
         CancellationToken cancellationToken
     )
     {

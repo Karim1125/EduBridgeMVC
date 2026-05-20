@@ -1,0 +1,249 @@
+@model SearchPageViewModel
+@{
+    var selectedTypeLabel = Model.Type switch
+    {
+        "ta" => "TAs",
+        "doctor" => "Doctors",
+        "student" => "Students",
+        _ => "All"
+    };
+}
+
+<style>
+    .search-control {
+        background: rgba(46, 16, 101, 0.86);
+        border: 1px solid rgba(196, 181, 253, 0.45);
+        border-radius: 12px;
+        color: #f5f3ff;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 20px rgba(46, 3, 68, 0.18);
+        outline: none;
+        transition: 0.2s ease;
+    }
+
+    .search-control::placeholder {
+        color: #c4b5fd;
+    }
+
+    .search-control:focus {
+        border-color: #04d2c8;
+        box-shadow: 0 0 0 3px rgba(4, 210, 200, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .search-type-dropdown {
+        position: relative;
+        min-width: 170px;
+    }
+
+    .search-type-button {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .search-type-menu {
+        display: none;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: calc(100% + 8px);
+        z-index: 40;
+        padding: 8px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #35265f, #4a2a84, #5b21b6);
+        border: 1px solid rgba(196, 181, 253, 0.38);
+        box-shadow: 0 18px 42px rgba(46, 3, 68, 0.38);
+    }
+
+    .search-type-dropdown.is-open .search-type-menu {
+        display: block;
+    }
+
+    .search-type-option {
+        width: 100%;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        background: rgba(196, 181, 253, 0.08);
+        color: #f5f3ff;
+        cursor: pointer;
+        display: block;
+        font-weight: 700;
+        margin: 0 0 6px;
+        padding: 10px 12px;
+        text-align: left;
+        transition: 0.2s ease;
+    }
+
+    .search-type-option:last-child {
+        margin-bottom: 0;
+    }
+
+    .search-type-option:hover,
+    .search-type-option:focus {
+        background: rgba(196, 181, 253, 0.2);
+        border-color: rgba(196, 181, 253, 0.38);
+        outline: none;
+    }
+
+    .search-type-option.is-selected {
+        background: linear-gradient(135deg, #7c3aed, #a855f7);
+        border-color: rgba(233, 213, 255, 0.45);
+        box-shadow: 0 8px 20px rgba(124, 58, 237, 0.28);
+    }
+</style>
+
+<div class="bradcam_area breadcam_bg overlay2" style="padding:120px 0;text-align:center;">
+    <h3 style="font-style: italic;">Search</h3>
+    <p>Find a TA, doctor, or student by name</p>
+</div>
+
+<div class="about_area" style="min-height:100vh;
+    background:linear-gradient(135deg,#f5f3ff,#ddd6fe,#c4b5fd,#a78bfa);
+    padding:50px 0;">
+    <div class="container">
+        <form method="get" asp-controller="Search" asp-action="Index"
+              style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+              background:linear-gradient(135deg,#35265f,#4a2a84,#5b21b6);
+              border:1px solid rgba(196,181,253,0.25);border-radius:18px;
+              padding:18px;box-shadow:0 12px 30px rgba(76,29,149,0.25);">
+            <input name="q"
+                   value="@Model.Query"
+                   placeholder="Search by name"
+                   class="search-control"
+                   style="flex:1;min-width:240px;padding:12px 14px;border-radius:12px;
+                   font-weight:600;" />
+
+            <input type="hidden" name="type" id="searchTypeValue" value="@Model.Type" />
+            <div class="search-type-dropdown" data-search-type-dropdown>
+                <button type="button"
+                        class="search-control search-type-button"
+                        data-search-type-button
+                        aria-haspopup="listbox"
+                        aria-expanded="false">
+                    <span data-search-type-label>@selectedTypeLabel</span>
+                    <i class="fa fa-angle-down"></i>
+                </button>
+                <div class="search-type-menu" role="listbox">
+                    <button type="button" class="search-type-option @(Model.Type == "all" ? "is-selected" : "")" data-search-type="all">All</button>
+                    <button type="button" class="search-type-option @(Model.Type == "ta" ? "is-selected" : "")" data-search-type="ta">TAs</button>
+                    <button type="button" class="search-type-option @(Model.Type == "doctor" ? "is-selected" : "")" data-search-type="doctor">Doctors</button>
+                    <button type="button" class="search-type-option @(Model.Type == "student" ? "is-selected" : "")" data-search-type="student">Students</button>
+                </div>
+            </div>
+
+            <button type="submit"
+                    style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;
+                    padding:12px 28px;border:none;border-radius:12px;font-weight:700;
+                    cursor:pointer;box-shadow:0 6px 18px rgba(124,58,237,0.35);">
+                Search
+            </button>
+        </form>
+
+        <div class="row mt-4">
+            @if (string.IsNullOrWhiteSpace(Model.Query))
+            {
+                <div class="col-12">
+                    <div style="padding:28px;border-radius:18px;text-align:center;
+                        background:linear-gradient(135deg,#35265f,#4c1d95);color:#f5f3ff;
+                        box-shadow:0 12px 30px rgba(76,29,149,0.25);">
+                        Enter a name to search.
+                    </div>
+                </div>
+            }
+            else if (!Model.Results.Any())
+            {
+                <div class="col-12">
+                    <div style="padding:28px;border-radius:18px;text-align:center;
+                        background:linear-gradient(135deg,#35265f,#4c1d95);color:#f5f3ff;
+                        box-shadow:0 12px 30px rgba(76,29,149,0.25);">
+                        No results found for "@Model.Query".
+                    </div>
+                </div>
+            }
+            else
+            {
+                @foreach (var result in Model.Results)
+                {
+                    <div class="col-xl-6 col-md-12 mb-4">
+                        <div style="display:flex;align-items:center;gap:18px;padding:20px;border-radius:18px;
+                            background:linear-gradient(135deg,#35265f,#4a2a84,#5b21b6);
+                            border:1px solid rgba(196,181,253,0.25);color:white;transition:0.25s ease;
+                            box-shadow:0 12px 30px rgba(76,29,149,0.35);"
+                             onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 20px 50px rgba(124,58,237,0.45)'"
+                             onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 12px 30px rgba(76,29,149,0.35)'">
+                            <img src="@(result.ProfileImageUrl ?? "/img/default.png")"
+                                 alt="@result.Name"
+                                 style="width:88px;height:88px;border-radius:50%;object-fit:cover;
+                                 border:2px solid #c4b5fd;box-shadow:0 0 14px rgba(196,181,253,0.5);" />
+
+                            <div style="flex:1;min-width:0;">
+                                <h5 style="margin:0;font-weight:700;color:#f5f3ff;">@result.Name</h5>
+                                <p style="margin:4px 0;color:#c4b5fd;font-size:14px;">@result.Email</p>
+                                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                                    <span style="display:inline-block;padding:3px 10px;border-radius:10px;
+                                        background:rgba(196,181,253,0.15);color:#e9d5ff;font-size:13px;">
+                                        @result.Type
+                                    </span>
+                                    @if (!string.IsNullOrWhiteSpace(result.Department))
+                                    {
+                                        <span style="display:inline-block;padding:3px 10px;border-radius:10px;
+                                            background:rgba(4,210,200,0.14);color:#ccfbf1;font-size:13px;">
+                                            @result.Department
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+
+                            <a asp-controller="@result.ControllerName"
+                               asp-action="Details"
+                               asp-route-id="@result.Id"
+                               style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;
+                               padding:8px 16px;border-radius:12px;text-decoration:none;font-weight:600;
+                               white-space:nowrap;box-shadow:0 6px 18px rgba(124,58,237,0.3);">
+                                View
+                            </a>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const searchTypeDropdown = document.querySelector('[data-search-type-dropdown]');
+        const searchTypeButton = document.querySelector('[data-search-type-button]');
+        const searchTypeLabel = document.querySelector('[data-search-type-label]');
+        const searchTypeValue = document.getElementById('searchTypeValue');
+
+        if (searchTypeDropdown && searchTypeButton && searchTypeLabel && searchTypeValue) {
+            searchTypeButton.addEventListener('click', () => {
+                const isOpen = searchTypeDropdown.classList.toggle('is-open');
+                searchTypeButton.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            });
+
+            document.querySelectorAll('[data-search-type]').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('[data-search-type]').forEach(item => item.classList.remove('is-selected'));
+                    option.classList.add('is-selected');
+                    searchTypeValue.value = option.dataset.searchType;
+                    searchTypeLabel.textContent = option.textContent.trim();
+                    searchTypeDropdown.classList.remove('is-open');
+                    searchTypeButton.setAttribute('aria-expanded', 'false');
+                });
+            });
+
+            document.addEventListener('click', event => {
+                if (!searchTypeDropdown.contains(event.target)) {
+                    searchTypeDropdown.classList.remove('is-open');
+                    searchTypeButton.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,73 @@
+@model IEnumerable<EduBridgeMVC.Contracts.Team.TeamResponse>
+
+<div class="bradcam_area breadcam_bg overlay2" style="padding:150px 0;text-align:center;">
+    <h3 style="font-style: italic;">Teams</h3>
+</div>
+
+<div class="about_area" style="min-height:100vh;background:linear-gradient(135deg,#f5f3ff,#ddd6fe,#c4b5fd,#a78bfa);padding:50px 0;">
+    <div class="container">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap;">
+            <a asp-controller="Request" asp-action="Index"
+               style="background:transparent;color:#4c1d95;padding:10px 22px;border-radius:14px;text-decoration:none;font-weight:700;border:1.5px solid #7c3aed;">
+                Requests
+            </a>
+            @if (User.IsInRole("Student"))
+            {
+                <a asp-action="Create"
+                   style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;padding:11px 26px;border-radius:14px;text-decoration:none;font-weight:600;box-shadow:0 6px 18px rgba(124,58,237,0.35);">
+                    Create Team
+                </a>
+            }
+        </div>
+
+        <div class="row mt-4">
+            @if (!Model.Any())
+            {
+                <div class="col-12">
+                    <div style="padding:28px;border-radius:22px;text-align:center;background:linear-gradient(135deg,#35265f,#4c1d95);color:#f5f3ff;box-shadow:0 12px 30px rgba(76,29,149,0.25);">
+                        No teams found.
+                    </div>
+                </div>
+            }
+
+            @foreach (var team in Model)
+            {
+                <div class="col-xl-6 col-md-12 mb-4" id="team-@team.Id">
+                    <div style="padding:22px;border-radius:22px;background:linear-gradient(135deg,#35265f,#4a2a84,#5b21b6);border:1px solid rgba(196,181,253,0.25);color:white;transition:0.25s ease;box-shadow:0 12px 30px rgba(76,29,149,0.35);min-height:225px;"
+                         onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 20px 50px rgba(124,58,237,0.45)'"
+                         onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 12px 30px rgba(76,29,149,0.35)'">
+                        <div style="display:flex;justify-content:space-between;gap:14px;align-items:flex-start;">
+                            <div>
+                                <h4 style="margin:0 0 8px;color:#f5f3ff;font-weight:700;">@team.Name</h4>
+                                <p style="margin:0;color:#c4b5fd;font-size:14px;">Leader: @team.LeaderName</p>
+                            </div>
+                            <span style="background:rgba(196,181,253,0.18);color:#e9d5ff;font-size:12px;padding:5px 12px;border-radius:10px;font-weight:700;">@team.Status</span>
+                        </div>
+
+                        <p style="margin:16px 0;color:#ede9fe;line-height:1.6;">@(team.Description ?? "No description added.")</p>
+
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0;">
+                            <div style="background:rgba(196,181,253,0.13);border-radius:14px;padding:12px;">
+                                <p style="margin:0;color:#c4b5fd;font-size:13px;">Members</p>
+                                <strong>@team.CurrentMembers / @team.MaxMembers</strong>
+                            </div>
+                            <div style="background:rgba(196,181,253,0.13);border-radius:14px;padding:12px;">
+                                <p style="margin:0;color:#c4b5fd;font-size:13px;">TA</p>
+                                <strong>@(team.TaName ?? "None")</strong>
+                            </div>
+                            <div style="background:rgba(196,181,253,0.13);border-radius:14px;padding:12px;">
+                                <p style="margin:0;color:#c4b5fd;font-size:13px;">Doctor</p>
+                                <strong>@(team.DoctorName ?? "None")</strong>
+                            </div>
+                        </div>
+
+                        <a asp-action="Details" asp-route-id="@team.Id"
+                           style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;padding:9px 18px;border-radius:12px;text-decoration:none;font-weight:600;box-shadow:0 6px 18px rgba(124,58,237,0.3);">
+                            View
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

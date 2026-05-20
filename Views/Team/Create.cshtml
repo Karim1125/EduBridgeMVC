@@ -1,0 +1,28 @@
+@model EduBridgeMVC.Contracts.Team.CreateTeamRequest
+
+<div class="bradcam_area breadcam_bg overlay2" style="padding:150px 0;text-align:center;">
+    <h3 style="font-style: italic;">Create Team</h3>
+</div>
+
+<div class="about_area" style="min-height:100vh;background:linear-gradient(135deg,#f5f3ff,#ede9fe,#ddd6fe);display:flex;align-items:center;justify-content:center;padding:40px 0;">
+    <div style="width:540px;padding:30px;border-radius:22px;background:linear-gradient(135deg,#3a2a5e,#4c1d95);border:4px dashed #a855f7;box-shadow:0 15px 35px rgba(91,33,182,0.35);color:white;">
+        <h3 style="text-align:center;margin-bottom:25px;font-size:22px;font-weight:700;color:#f5f3ff;">Create Team</h3>
+
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+
+            <label style="color:#c4b5fd;">Name</label>
+            <input asp-for="Name" style="width:100%;padding:10px;margin-bottom:12px;border-radius:10px;border:1px solid #7c3aed;background:transparent;color:white;outline:none;" />
+
+            <label style="color:#c4b5fd;">Description</label>
+            <textarea asp-for="Description" rows="4" style="width:100%;padding:10px;margin-bottom:18px;border-radius:10px;border:1px solid #7c3aed;background:transparent;color:white;outline:none;"></textarea>
+
+            <button type="submit" style="width:100%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;padding:12px;border:none;border-radius:12px;font-weight:600;cursor:pointer;">Save Team</button>
+            <div asp-validation-summary="ModelOnly" style="color:#f87171;margin-top:15px;text-align:center;"></div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

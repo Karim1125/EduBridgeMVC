@@ -1,0 +1,69 @@
+@{
+    var isStudent = User.IsInRole("Student");
+    var isTA = User.IsInRole("TA");
+    var isDoctor = User.IsInRole("Doctor");
+    var taId = ViewData["TaId"] as Guid?;
+    var doctorId = ViewData["DoctorId"] as Guid?;
+}
+
+<div class="bradcam_area breadcam_bg overlay2" style="padding:150px 0;text-align:center;">
+    <h3 style="font-style: italic;">Requests</h3>
+</div>
+
+<div class="about_area" style="min-height:100vh;background:linear-gradient(135deg,#f5f3ff,#ddd6fe,#c4b5fd,#a78bfa);padding:50px 0;">
+    <div class="container">
+        <div class="row">
+            @if (isStudent)
+            {
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <a asp-controller="JoinRequest" asp-action="MyRequests" style="display:block;text-decoration:none;">
+                        <div style="padding:26px;border-radius:22px;background:linear-gradient(135deg,#35265f,#4a2a84,#5b21b6);color:white;box-shadow:0 12px 30px rgba(76,29,149,0.35);min-height:155px;">
+                            <h4 style="color:#f5f3ff;">My Join Requests</h4>
+                            <p style="color:#c4b5fd;margin:0;">Track join requests you sent to teams.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <a asp-controller="Team" asp-action="Index" style="display:block;text-decoration:none;">
+                        <div style="padding:26px;border-radius:22px;background:linear-gradient(135deg,#35265f,#4a2a84,#5b21b6);color:white;box-shadow:0 12px 30px rgba(76,29,149,0.35);min-height:155px;">
+                            <h4 style="color:#f5f3ff;">Team Requests</h4>
+                            <p style="color:#c4b5fd;margin:0;">Open your team to manage join, TA, and doctor requests.</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <a asp-controller="Team" asp-action="Index" style="display:block;text-decoration:none;">
+                        <div style="padding:26px;border-radius:22px;background:linear-gradient(135deg,#35265f,#4a2a84,#5b21b6);color:white;box-shadow:0 12px 30px rgba(76,29,149,0.35);min-height:155px;">
+                            <h4 style="color:#f5f3ff;">Browse Teams</h4>
+                            <p style="color:#c4b5fd;margin:0;">Find a team and send a join request.</p>
+                        </div>
+                    </a>
+                </div>
+            }
+
+            @if (isTA)
+            {
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <a asp-controller="TARequest" asp-action="Incoming" asp-route-taId="@taId" style="display:block;text-decoration:none;">
+                        <div style="padding:26px;border-radius:22px;background:linear-gradient(135deg,#35265f,#4a2a84,#5b21b6);color:white;box-shadow:0 12px 30px rgba(76,29,149,0.35);min-height:155px;">
+                            <h4 style="color:#f5f3ff;">Incoming Requests</h4>
+                            <p style="color:#c4b5fd;margin:0;">Accept or remove team supervision requests.</p>
+                        </div>
+                    </a>
+                </div>
+            }
+
+            @if (isDoctor)
+            {
+                <div class="col-xl-4 col-md-6 mb-4">
+                    <a asp-controller="DoctorRequest" asp-action="Incoming" asp-route-doctorId="@doctorId" style="display:block;text-decoration:none;">
+                        <div style="padding:26px;border-radius:22px;background:linear-gradient(135deg,#35265f,#4a2a84,#5b21b6);color:white;box-shadow:0 12px 30px rgba(76,29,149,0.35);min-height:155px;">
+                            <h4 style="color:#f5f3ff;">Incoming Requests</h4>
+                            <p style="color:#c4b5fd;margin:0;">Accept or remove team supervision requests.</p>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

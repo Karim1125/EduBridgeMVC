@@ -1,7 +1,7 @@
 @model IEnumerable<EduBridgeMVC.Contracts.TA.TAResponse>
 
 <div class="bradcam_area breadcam_bg overlay2" style="padding: 150px 0;">
-    <h3 style="font-style: italic;">Teaching Assistants</h3>
+    <h3 style="font-style: italic;">@(ViewData["ListTitle"] ?? "Teaching Assistants")</h3>
 </div>
 
 <div class="about_area" style="min-height:100vh;
@@ -11,9 +11,25 @@
         <div id="toast-ajax" style="display:none; position:fixed;top:100px;left:50%;transform:translateX(-50%);
             z-index:9999;background:#7e22ce;color:white;padding:14px 30px;border-radius:20px;font-weight:bold;"></div>
 
-        @if (User.IsInRole("Admin"))
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap;">
+            <a asp-action="Available"
+               style="background:transparent;color:#4c1d95;padding:10px 22px;border-radius:14px;
+               text-decoration:none;font-weight:700;border:1.5px solid #7c3aed;transition:0.25s;"
+               onmouseover="this.style.background='rgba(124,58,237,0.12)'"
+               onmouseout="this.style.background='transparent'">
+                Available TAs
+            </a>
+
+        @if (User.Identity?.IsAuthenticated == true && User.IsInRole("TA"))
         {
-            <div style="text-align:right; margin-bottom:24px;">
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <a asp-action="SupervisedTeams"
+                   style="background:transparent;color:#4c1d95;padding:10px 22px;border-radius:14px;
+                   text-decoration:none;font-weight:700;border:1.5px solid #7c3aed;transition:0.25s;"
+                   onmouseover="this.style.background='rgba(124,58,237,0.12)'"
+                   onmouseout="this.style.background='transparent'">
+                    My Teams
+                </a>
                 <a asp-action="Create"
                    style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;
                    padding:11px 26px;border-radius:14px;text-decoration:none;font-weight:600;
@@ -21,12 +37,23 @@
                    display:inline-flex;align-items:center;gap:8px;"
                    onmouseover="this.style.transform='translateY(-3px)'"
                    onmouseout="this.style.transform='translateY(0)'">
-                    ＋ Add TA
+                    Complete Profile
                 </a>
             </div>
         }
+        </div>
 
         <div class="row mt-4">
+            @if (!Model.Any())
+            {
+                <div class="col-12">
+                    <div style="padding:28px;border-radius:22px;text-align:center;
+                        background:linear-gradient(135deg,#35265f,#4c1d95);color:#f5f3ff;
+                        box-shadow:0 12px 30px rgba(76,29,149,0.25);">
+                        No teaching assistants found.
+                    </div>
+                </div>
+            }
             @foreach (var ta in Model)
             {
                 <div class="col-xl-6 col-md-12 mb-4" id="ta-@ta.Id">

@@ -31,10 +31,18 @@ public class IdeaCategoryService(
         var name = request.Name.Trim().ToLowerInvariant();
 
         var existing = await context.IdeaCategories
+            .IgnoreQueryFilters()
             .FirstOrDefaultAsync(c => c.Name == name, cancellationToken);
 
-        if (existing is not null)
+        if (existing is not null && !existing.IsDeleted)
             return Result.Success(existing.Id);
+
+        if (existing is not null)
+        {
+            existing.IsDeleted = false;
+            await context.SaveChangesAsync(cancellationToken);
+            return Result.Success(existing.Id);
+        }
 
         try
         {
@@ -46,9 +54,19 @@ public class IdeaCategoryService(
         catch (DbUpdateException)
         {
             var category = await context.IdeaCategories
+                .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(c => c.Name == name, cancellationToken);
 
-            return Result.Success(category!.Id);
+            if (category is null)
+                return Result.Failure<Guid>(IdeaCategoryErrors.DuplicateCategoryName);
+
+            if (category.IsDeleted)
+            {
+                category.IsDeleted = false;
+                await context.SaveChangesAsync(cancellationToken);
+            }
+
+            return Result.Success(category.Id);
         }
     }
 
@@ -65,6 +83,7 @@ public class IdeaCategoryService(
         var normalizedName = request.Name.Trim().ToLowerInvariant();
 
         var nameExists = await context.IdeaCategories
+            .IgnoreQueryFilters()
             .AnyAsync(c => c.Name == normalizedName && c.Id != id, cancellationToken);
 
         if (nameExists)
@@ -80,12 +99,22 @@ public class IdeaCategoryService(
     public async Task<Result> DeleteAsync(
         Guid id, CancellationToken cancellationToken = default)
     {
-        var category = await context.FindAsync<IdeaCategory>([id], cancellationToken);
+        var category = await context.IdeaCategories
+            .Include(c => c.Tags)
+            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
 
         if (category is null || category.IsDeleted)
             return Result.Failure(IdeaCategoryErrors.CategoryNotFound);
 
+        var hasIdeas = await context.Ideas
+            .AnyAsync(i => i.CategoryId == id, cancellationToken);
+
+        if (hasIdeas)
+            return Result.Failure(IdeaCategoryErrors.CategoryInUse);
+
         category.IsDeleted = true;
+        foreach (var tag in category.Tags)
+            tag.IsDeleted = true;
 
         await context.SaveChangesAsync(cancellationToken);
 

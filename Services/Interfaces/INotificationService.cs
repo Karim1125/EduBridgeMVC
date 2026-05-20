@@ -13,7 +13,7 @@ public interface INotificationService
     Task<Result<int>> GetUnreadCountAsync(string userId, CancellationToken cancellationToken = default);
 
     // Operations
-    Task<Result> MarkAsReadAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Result> MarkAsReadAsync(Guid id, string userId, CancellationToken cancellationToken = default);
     Task<Result> MarkAllAsReadAsync(string userId, CancellationToken cancellationToken = default);
 
     // Internal - called by other services

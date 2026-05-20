@@ -15,6 +15,7 @@ public class SkillService(ApplicationDbContext context) : ISkillService
     {
         var skills = await context.Skills
             .AsNoTracking()
+            .OrderBy(s => s.Name)
             .Select(s => new SkillResponse(s.Id, s.Name))
             .ToListAsync(cancellationToken);
 
@@ -27,10 +28,18 @@ public class SkillService(ApplicationDbContext context) : ISkillService
         skillName = skillName.Trim().ToLowerInvariant();
 
         var existing = await context.Skills
+            .IgnoreQueryFilters()
             .FirstOrDefaultAsync(s => s.Name == skillName, cancellationToken);
 
-        if (existing is not null)
+        if (existing is not null && !existing.IsDeleted)
             return Result.Success(existing.Id);
+
+        if (existing is not null)
+        {
+            existing.IsDeleted = false;
+            await context.SaveChangesAsync(cancellationToken);
+            return Result.Success(existing.Id);
+        }
 
         try
         {
@@ -43,9 +52,19 @@ public class SkillService(ApplicationDbContext context) : ISkillService
         catch (DbUpdateException)
         {
             var skill = await context.Skills
+                .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(s => s.Name == skillName, cancellationToken);
 
-            return Result.Success(skill!.Id);
+            if (skill is null)
+                return Result.Failure<Guid>(SkillErrors.DuplicateSkillName);
+
+            if (skill.IsDeleted)
+            {
+                skill.IsDeleted = false;
+                await context.SaveChangesAsync(cancellationToken);
+            }
+
+            return Result.Success(skill.Id);
         }
     }
 
@@ -60,6 +79,7 @@ public class SkillService(ApplicationDbContext context) : ISkillService
         var normalizedName = request.Name.Trim().ToLowerInvariant();
 
         var nameExists = await context.Skills
+            .IgnoreQueryFilters()
             .AnyAsync(s => s.Name == normalizedName && s.Id != id, cancellationToken);
 
         if (nameExists)

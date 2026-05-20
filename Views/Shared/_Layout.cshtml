@@ -33,7 +33,24 @@
         #navigation li a {
             font-size: 14px !important;
         }
-
+        #navigation li .submenu {
+            background: #faf5ff !important;
+            border: 1px solid #e9d5ff !important;
+            border-radius: 8px !important;
+            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.15) !important;
+        }
+        #navigation li .submenu li a {
+            color: #2e0344 !important;
+            font-size: 15px !important;
+            font-weight: 500;
+            padding: 12px 18px !important;
+        }
+        #navigation li .submenu li a:hover {
+            color: #a855f7 !important;
+            background: #f5f3ff !important;
+            border-left: 3px solid #a855f7 !important;
+            padding-left: 15px !important;
+        }
         #navigation .people-menu .submenu {
             background: linear-gradient(135deg, #35265f, #4a2a84, #5b21b6);
             border: 1px solid rgba(196, 181, 253, 0.35);
@@ -42,23 +59,19 @@
             overflow: hidden;
             padding: 8px;
         }
-
         #navigation .people-menu .submenu li a {
             color: #f5f3ff !important;
             border-radius: 10px;
             padding: 10px 14px;
             font-weight: 600;
         }
-
         #navigation .people-menu .submenu li a:hover {
             background: rgba(196, 181, 253, 0.18);
             color: #ffffff !important;
         }
-
         #navigation .people-menu .submenu li a::before {
             display: none;
         }
-
         .login-btn {
             background: #2e0344;
             border: 2px dotted #6954c4;
@@ -100,6 +113,33 @@
             box-shadow: 0 12px 30px rgba(168, 85, 247, 0.4);
             transform: translateY(-3px);
         }
+
+        .notification-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: 2px solid rgba(192, 132, 252, 0.75);
+            color: #f5f3ff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 14px;
+            text-decoration: none;
+            transition: 0.25s ease;
+        }
+
+        .notification-btn i {
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .notification-btn:hover {
+            color: #ffffff;
+            background: rgba(168, 85, 247, 0.22);
+            box-shadow: 0 10px 24px rgba(168, 85, 247, 0.35);
+            transform: translateY(-2px);
+        }
+
 </style>
 </head>
 
@@ -119,26 +159,44 @@
                         </div>
                     </div>
 
-                    <div class="col-xl-7 col-lg-7">
+                    <div class="col-xl-6 col-lg-6">
                         <div class="main-menu d-none d-lg-block">
                             <nav>
                                 <ul id="navigation" style="white-space:nowrap; flex-wrap:nowrap; display:flex; align-items:center; gap:0;">
 
                                     <li><a asp-controller="Home" asp-action="Index">Home</a></li>
+                                    <li><a asp-controller="Idea" asp-action="Index">Library</a></li>
                                     <li><a asp-controller="Team" asp-action="Index">Teams</a></li>
-                                    <li><a asp-controller="Library" asp-action="Index">Library</a></li>
-                                    <li><a asp-controller="Search" asp-action="Index">Search</a></li>
-                                    <li><a asp-controller="Request" asp-action="Index">Requests</a></li>
                                     <li><a asp-controller="Profile" asp-action="Index">Profile</a></li>
+                                    <li>
+                                        <a href="#">More <i class="fa fa-angle-down"></i></a>
+                                        <ul class="submenu">
+                                            <li><a asp-controller="Search" asp-action="Index">Search</a></li>
+                                            <li><a asp-controller="Request" asp-action="Index">Requests</a></li>
+                                            @if (isAuth && User.IsInRole("Admin"))
+                                            {
+                                                <li><a asp-controller="Skill" asp-action="Index">Skills</a></li>
+                                            }
+                                        </ul>
+                                    </li>
 
-                                    @if (isAuth)
+                                    @if (isAuth && (User.IsInRole("TA") || User.IsInRole("Doctor") || User.IsInRole("Admin")))
                                     {
                                         <li class="people-menu">
                                             <a href="#">People <i class="ti-angle-down"></i></a>
                                             <ul class="submenu">
-                                                <li><a asp-controller="Ta" asp-action="Index">TAs</a></li>
-                                                <li><a asp-controller="Doctor" asp-action="Index">Doctors</a></li>
-                                                <li><a asp-controller="User" asp-action="Students">Students</a></li>
+                                                @if (User.IsInRole("TA") || User.IsInRole("Admin"))
+                                                {
+                                                    <li><a asp-controller="Ta" asp-action="Index">TAs</a></li>
+                                                }
+                                                @if (User.IsInRole("Doctor") || User.IsInRole("Admin"))
+                                                {
+                                                    <li><a asp-controller="Doctor" asp-action="Index">Doctors</a></li>
+                                                }
+                                                @if (User.IsInRole("Admin"))
+                                                {
+                                                    <li><a asp-controller="User" asp-action="Index">Users</a></li>
+                                                }
                                             </ul>
                                         </li>
                                     }
@@ -148,11 +206,14 @@
                         </div>
                     </div>
 
-                    <div class="col-xl-3 col-lg-3 d-none d-lg-block">
+                    <div class="col-xl-4 col-lg-4 d-none d-lg-block">
                         <div class="log_chat_area d-flex align-items-center">
 
                             @if (isAuth)
                             {
+                                <a asp-controller="Notification" asp-action="Index" class="notification-btn" title="Notifications" aria-label="Notifications">
+                                    <i class="fa fa-bell"></i>
+                                </a>
                                 <a asp-controller="Auth" asp-action="Logout" class="logout-btn ">Logout</a>
                             }
                             else

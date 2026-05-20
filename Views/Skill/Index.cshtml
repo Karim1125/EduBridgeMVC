@@ -1,0 +1,101 @@
+@model IEnumerable<EduBridgeMVC.Contracts.Skills.SkillResponse>
+
+<div class="bradcam_area breadcam_bg overlay2" style="padding: 150px 0;">
+    <h3 style="font-style: italic;">Skills</h3>
+</div>
+
+<div class="about_area" style="min-height:100vh;
+    background:linear-gradient(135deg,#f5f3ff,#ddd6fe,#c4b5fd,#a78bfa);padding:50px 0;">
+
+    <div class="container">
+        <div id="toast-ajax" style="display:none; position:fixed;top:100px;left:50%;transform:translateX(-50%);
+            z-index:9999;background:#7e22ce;color:white;padding:14px 30px;border-radius:20px;font-weight:bold;"></div>
+
+        <div style="text-align:right; margin-bottom:24px;">
+            <a asp-action="Create"
+               style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;
+               padding:11px 26px;border-radius:14px;text-decoration:none;font-weight:600;
+               font-size:15px;transition:0.25s;box-shadow:0 6px 18px rgba(124,58,237,0.35);
+               display:inline-flex;align-items:center;gap:8px;"
+               onmouseover="this.style.transform='translateY(-3px)'"
+               onmouseout="this.style.transform='translateY(0)'">
+                + Add Skill
+            </a>
+        </div>
+
+        <div class="row mt-2">
+            @if (!Model.Any())
+            {
+                <div class="col-12" style="text-align:center;padding:40px;">
+                    <p style="color:#7c3aed;font-size:18px;font-weight:500;">No skills found.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var skill in Model)
+                {
+                    <div class="col-lg-4 col-md-6 mb-4" id="skill-@skill.Id">
+                        <div style="padding:20px;border-radius:22px;
+                            background:linear-gradient(135deg,#35265f,#4a2a84,#5b21b6);
+                            border:1px solid rgba(196,181,253,0.25);color:white;transition:0.25s ease;
+                            box-shadow:0 12px 30px rgba(76,29,149,0.35);"
+                             onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='0 20px 50px rgba(124,58,237,0.45)'"
+                             onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 12px 30px rgba(76,29,149,0.35)'">
+
+                            <h5 style="margin:0;font-weight:600;color:#f5f3ff;font-size:17px;">@skill.Name</h5>
+
+                            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid rgba(196,181,253,0.1);">
+                                <a asp-action="Edit" asp-route-id="@skill.Id"
+                                   style="background:linear-gradient(135deg,#0ea5e9,#06b6d4);color:white;
+                                    padding:6px 14px;border-radius:10px;text-decoration:none;font-weight:500;font-size:13px;
+                                    transition:0.25s;">Edit</a>
+
+                                <button onclick="deleteSkill('@skill.Id', this)"
+                                        style="background:linear-gradient(135deg,#ef4444,#dc2626);color:white;
+                                    padding:6px 14px;border-radius:10px;border:none;font-size:13px;
+                                    font-weight:500;cursor:pointer;transition:0.25s;">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function deleteSkill(skillId, btn) {
+    if (!confirm('Delete this Skill?')) return;
+    btn.disabled = true;
+    fetch('/Skill/delete/' + skillId, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            var card = document.getElementById('skill-' + skillId);
+            if (card) {
+                card.style.transition = 'opacity 0.4s';
+                card.style.opacity = '0';
+                setTimeout(() => { card.style.display = 'none'; }, 450);
+            }
+            showToast('Skill deleted successfully');
+        } else {
+            btn.disabled = false;
+            showToast('Error: ' + data.message, true);
+        }
+    })
+    .catch(() => { btn.disabled = false; showToast('Request failed', true); });
+}
+
+function showToast(msg, isError) {
+    var t = document.getElementById('toast-ajax');
+    t.textContent = msg;
+    t.style.background = isError ? '#ef4444' : '#7e22ce';
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 2500);
+}
+</script>
+}

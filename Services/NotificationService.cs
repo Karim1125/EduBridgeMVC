@@ -36,9 +36,10 @@ public class NotificationService(
     }
 
     public async Task<Result> MarkAsReadAsync(
-        Guid id, CancellationToken cancellationToken = default)
+        Guid id, string userId, CancellationToken cancellationToken = default)
     {
-        var notification = await context.FindAsync<Notification>([id], cancellationToken);
+        var notification = await context.Notifications
+            .FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId, cancellationToken);
 
         if (notification is null || notification.IsDeleted)
             return Result.Failure(NotificationErrors.NotificationNotFound);

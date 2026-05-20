@@ -9,5 +9,5 @@ public record UserProfileResponse(
     string? ProfileImageUrl,
     string? GitHubUrl,
     string? LinkedInUrl,
-    IEnumerable<string> Skills
+    IEnumerable<SkillResponse> Skills
 );

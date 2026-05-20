@@ -1,4 +1,5 @@
 using EduBridgeMVC.Contracts.TA;
+using EduBridgeMVC.Contracts.Team;
 using EduBridgeMVC.Extensions;
 using EduBridgeMVC.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -7,12 +8,15 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace EduBridgeMVC.Controllers;
 
-[Authorize(Roles = "TA,Admin")]
+[Authorize]
 [Route("[controller]")]
 public class TaController(ITaService taService, IUserService userService) : Controller
 {
     private readonly ITaService _taService = taService;
     private readonly IUserService _userService = userService;
+
+    private bool CanManageProfile(string userId) =>
+        User.IsInRole("Admin") || User.GetUserId() == userId;
 
     public override async Task OnActionExecutionAsync(
     ActionExecutingContext context,
@@ -50,6 +54,36 @@ public class TaController(ITaService taService, IUserService userService) : Cont
         return View(result.Value);
     }
 
+    [HttpGet("available")]
+    public async Task<IActionResult> Available(CancellationToken cancellationToken)
+    {
+        var result = await _taService.GetAvailableTAsAsync(cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Error.Description;
+            return View(nameof(Index), Enumerable.Empty<TAResponse>());
+        }
+
+        ViewData["ListTitle"] = "Available Teaching Assistants";
+        return View(nameof(Index), result.Value);
+    }
+
+    [Authorize(Roles = "TA")]
+    [HttpGet("supervised-teams")]
+    public async Task<IActionResult> SupervisedTeams(CancellationToken cancellationToken)
+    {
+        var result = await _taService.GetSupervisedTeamsAsync(cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Error.Description;
+            return View(Enumerable.Empty<TeamResponse>());
+        }
+
+        return View(result.Value);
+    }
+
     [HttpGet("details/{id}")]
     public async Task<IActionResult> Details(Guid id, CancellationToken cancellationToken)
     {
@@ -64,10 +98,12 @@ public class TaController(ITaService taService, IUserService userService) : Cont
         return View(result.Value);
     }
 
+    [Authorize(Roles = "TA")]
     [HttpGet("create")]
     public IActionResult Create() =>
         View(new CreateTaRequest(string.Empty, null, null, 0));
 
+    [Authorize(Roles = "TA")]
     [HttpPost("create")]
     public async Task<IActionResult> Create(CreateTaRequest request, CancellationToken cancellationToken)
     {
@@ -87,6 +123,7 @@ public class TaController(ITaService taService, IUserService userService) : Cont
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "TA,Admin")]
     [HttpGet("edit/{id}")]
     public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken)
     {
@@ -98,6 +135,9 @@ public class TaController(ITaService taService, IUserService userService) : Cont
             return RedirectToAction(nameof(Index));
         }
 
+        if (!CanManageProfile(result.Value.UserId))
+            return Forbid();
+
         var request = new UpdateTaRequest(
             result.Value.Department,
             result.Value.AcademicTitle,
@@ -108,11 +148,22 @@ public class TaController(ITaService taService, IUserService userService) : Cont
         return View(request);
     }
 
+    [Authorize(Roles = "TA,Admin")]
     [HttpPost("edit/{id}")]
     public async Task<IActionResult> Edit(Guid id, UpdateTaRequest request, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
             return View(request);
+
+        var taResult = await _taService.GetByIdAsync(id, cancellationToken);
+        if (!taResult.IsSuccess)
+        {
+            TempData["Error"] = taResult.Error.Description;
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (!CanManageProfile(taResult.Value.UserId))
+            return Forbid();
 
         var result = await _taService.UpdateAsync(id, request, cancellationToken);
 
@@ -126,6 +177,7 @@ public class TaController(ITaService taService, IUserService userService) : Cont
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "TA,Admin")]
     [HttpPost("upload-image/{id}")]
     public async Task<IActionResult> UploadImage(Guid id, IFormFile image, CancellationToken cancellationToken)
     {
@@ -141,6 +193,9 @@ public class TaController(ITaService taService, IUserService userService) : Cont
             TempData["Error"] = taResult.Error.Description;
             return RedirectToAction(nameof(Index));
         }
+
+        if (!CanManageProfile(taResult.Value.UserId))
+            return Forbid();
 
         var result = await _userService.UploadProfileImageAsync(taResult.Value.UserId, image, cancellationToken);
 

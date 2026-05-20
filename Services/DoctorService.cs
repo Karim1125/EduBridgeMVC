@@ -29,6 +29,7 @@ public class DoctorService(
         var doctors = await context.Doctors
             .AsNoTracking()
             .Include(d => d.User)
+            .Where(d => !d.IsDeleted)
             .ToListAsync(cancellationToken);
 
         return Result.Success(mapper.Map<IEnumerable<DoctorResponse>>(doctors));
@@ -40,7 +41,21 @@ public class DoctorService(
         var doctor = await context.Doctors
             .AsNoTracking()
             .Include(d => d.User)
-            .FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
+            .FirstOrDefaultAsync(d => d.Id == id && !d.IsDeleted, cancellationToken);
+
+        if (doctor is null)
+            return Result.Failure<DoctorResponse>(DoctorErrors.DoctorNotFound);
+
+        return Result.Success(mapper.Map<DoctorResponse>(doctor));
+    }
+
+    public async Task<Result<DoctorResponse>> GetCurrentAsync(
+        CancellationToken cancellationToken = default)
+    {
+        var doctor = await context.Doctors
+            .AsNoTracking()
+            .Include(d => d.User)
+            .FirstOrDefaultAsync(d => d.UserId == CurrentUserId && !d.IsDeleted, cancellationToken);
 
         if (doctor is null)
             return Result.Failure<DoctorResponse>(DoctorErrors.DoctorNotFound);
@@ -54,7 +69,7 @@ public class DoctorService(
         var doctors = await context.Doctors
             .AsNoTracking()
             .Include(d => d.User)
-            .Where(d => d.AvailableTeams > 0)
+            .Where(d => d.AvailableTeams > 0 && !d.IsDeleted)
             .ToListAsync(cancellationToken);
 
         return Result.Success(mapper.Map<IEnumerable<DoctorResponse>>(doctors));
@@ -73,6 +88,8 @@ public class DoctorService(
             .AsNoTracking()
             .Include(t => t.Members)
             .Include(t => t.Leader)
+            .Include(t => t.Ta).ThenInclude(ta => ta!.User)
+            .Include(t => t.Doctor).ThenInclude(d => d!.User)
             .Where(t => t.DoctorId == doctor.Id)
             .ToListAsync(cancellationToken);
 

@@ -1,0 +1,76 @@
+@using EduBridgeMVC.Abstractions.Consts
+@model IEnumerable<EduBridgeMVC.Contracts.Skills.JoinRequestResponse>
+@{
+    var title = ViewData["ListTitle"] ?? "Join Requests";
+    var teamId = ViewData["TeamId"] as Guid?;
+    var isTeamInbox = teamId.HasValue && teamId.Value != Guid.Empty;
+}
+
+<div class="bradcam_area breadcam_bg overlay2" style="padding:150px 0;text-align:center;">
+    <h3 style="font-style: italic;">@title</h3>
+</div>
+
+<div class="about_area" style="min-height:100vh;background:linear-gradient(135deg,#f5f3ff,#ddd6fe,#c4b5fd,#a78bfa);padding:50px 0;">
+    <div class="container">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:24px;">
+            <a asp-controller="Request" asp-action="Index" style="background:transparent;color:#4c1d95;padding:10px 22px;border-radius:14px;text-decoration:none;font-weight:700;border:1.5px solid #7c3aed;">Requests</a>
+        </div>
+
+        <div class="row">
+            @if (!Model.Any())
+            {
+                <div class="col-12">
+                    <div style="padding:28px;border-radius:22px;text-align:center;background:linear-gradient(135deg,#35265f,#4c1d95);color:#f5f3ff;">No join requests found.</div>
+                </div>
+            }
+
+            @foreach (var request in Model)
+            {
+                <div class="col-xl-6 col-md-12 mb-4">
+                    <div style="padding:22px;border-radius:22px;background:linear-gradient(135deg,#35265f,#4a2a84,#5b21b6);color:white;box-shadow:0 12px 30px rgba(76,29,149,0.35);">
+                        <div style="display:flex;justify-content:space-between;gap:12px;">
+                            <div>
+                                <h4 style="margin:0 0 8px;color:#f5f3ff;">@request.TeamName</h4>
+                                <p style="margin:0;color:#c4b5fd;">Student: @request.StudentName</p>
+                            </div>
+                            <span style="background:rgba(196,181,253,0.18);color:#e9d5ff;font-size:12px;padding:5px 12px;border-radius:10px;font-weight:700;">@request.Status</span>
+                        </div>
+                        <p style="margin:16px 0;color:#ede9fe;">@(request.Message ?? "No message.")</p>
+                        @if (!string.IsNullOrWhiteSpace(request.ResponseMessage))
+                        {
+                            <p style="margin:0 0 16px;color:#c4b5fd;">Response: @request.ResponseMessage</p>
+                        }
+
+                        @if (request.Status == RequestStatus.Pending)
+                        {
+                            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                                @if (isTeamInbox)
+                                {
+                                    <form asp-action="Approve" asp-route-id="@request.Id" method="post" style="display:flex;gap:8px;flex:1;min-width:230px;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="teamId" value="@teamId" />
+                                        <input name="responseMessage" placeholder="Response" style="flex:1;padding:9px;border-radius:10px;border:1px solid #7c3aed;background:transparent;color:white;" />
+                                        <button type="submit" style="background:#16a34a;color:white;border:none;border-radius:10px;padding:9px 14px;font-weight:600;">Approve</button>
+                                    </form>
+                                    <form asp-action="Reject" asp-route-id="@request.Id" method="post" style="display:inline;">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="teamId" value="@teamId" />
+                                        <button type="submit" style="background:#dc2626;color:white;border:none;border-radius:10px;padding:9px 14px;font-weight:600;">Reject</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="Cancel" asp-route-id="@request.Id" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="teamId" value="@request.TeamId" />
+                                        <button type="submit" style="background:#dc2626;color:white;border:none;border-radius:10px;padding:9px 14px;font-weight:600;">Cancel</button>
+                                    </form>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,398 @@
+@using System.Security.Claims
+@using System.Text.Json
+@model EduBridgeMVC.Contracts.Team.TeamResponse
+@{
+    var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    var isLeader = Model.LeaderId == currentUserId;
+    var tas = ViewBag.TAs as IEnumerable<EduBridgeMVC.Contracts.TA.TAResponse> ?? Enumerable.Empty<EduBridgeMVC.Contracts.TA.TAResponse>();
+    var doctors = ViewBag.Doctors as IEnumerable<EduBridgeMVC.Contracts.Doctor.DoctorResponse> ?? Enumerable.Empty<EduBridgeMVC.Contracts.Doctor.DoctorResponse>();
+    var students = ViewBag.Students as IEnumerable<EduBridgeMVC.Contracts.User.UserResponse> ?? Enumerable.Empty<EduBridgeMVC.Contracts.User.UserResponse>();
+    var profileJsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+}
+
+<div class="bradcam_area breadcam_bg overlay2" style="padding:150px 0;text-align:center;">
+    <h3 style="font-style: italic;">Team Details</h3>
+</div>
+
+<div class="about_area" style="min-height:100vh;background:linear-gradient(135deg,#f5f3ff,#ede9fe,#ddd6fe);padding:50px 0;">
+    <div class="container">
+        <div style="max-width:820px;margin:0 auto;border-radius:24px;padding:35px;background:linear-gradient(135deg,#35265f,#4c1d95);border:4px dotted #a855f7;box-shadow:0 20px 50px rgba(91,33,182,0.35);color:white;">
+            <div style="display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap;">
+                <div>
+                    <h2 style="margin:0 0 8px;font-size:30px;font-weight:700;color:#ffffff;">@Model.Name</h2>
+                    <p style="color:#e9d5ff;margin:0;">Leader: @Model.LeaderName</p>
+                </div>
+                <span style="background:rgba(196,181,253,0.18);color:#e9d5ff;font-size:13px;padding:7px 14px;border-radius:10px;font-weight:700;">@Model.Status</span>
+            </div>
+
+            <p style="margin:24px 0;color:#ede9fe;line-height:1.7;">@(Model.Description ?? "No description added.")</p>
+
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:26px;">
+                <div style="background:rgba(196,181,253,0.13);border-radius:14px;padding:14px;">
+                    <p style="margin:0;color:#c4b5fd;font-size:13px;">Members</p>
+                    <strong>@Model.CurrentMembers / @Model.MaxMembers</strong>
+                </div>
+                <div style="background:rgba(196,181,253,0.13);border-radius:14px;padding:14px;">
+                    <p style="margin:0;color:#c4b5fd;font-size:13px;">TA</p>
+                    <strong>@(Model.TaName ?? "Not assigned")</strong>
+                </div>
+                <div style="background:rgba(196,181,253,0.13);border-radius:14px;padding:14px;">
+                    <p style="margin:0;color:#c4b5fd;font-size:13px;">Doctor</p>
+                    <strong>@(Model.DoctorName ?? "Not assigned")</strong>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;">
+                @if (isLeader)
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.Id" style="background:transparent;color:#e9d5ff;padding:10px 18px;border-radius:12px;text-decoration:none;font-weight:600;border:1.5px solid #a855f7;">Edit</a>
+                    <a asp-controller="JoinRequest" asp-action="Incoming" asp-route-teamId="@Model.Id" style="background:transparent;color:#e9d5ff;padding:10px 18px;border-radius:12px;text-decoration:none;font-weight:600;border:1.5px solid #a855f7;">Join Requests</a>
+                    <a asp-action="Members" asp-route-id="@Model.Id" style="background:transparent;color:#e9d5ff;padding:10px 18px;border-radius:12px;text-decoration:none;font-weight:600;border:1.5px solid #a855f7;">Members</a>
+                    <button onclick="deleteTeam('@Model.Id')" style="background:linear-gradient(135deg,#ef4444,#dc2626);color:white;padding:10px 18px;border-radius:12px;border:none;font-weight:600;cursor:pointer;">Delete</button>
+                }
+                else if (User.IsInRole("Student"))
+                {
+                    <form asp-controller="JoinRequest" asp-action="Send" asp-route-teamId="@Model.Id" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;padding:10px 18px;border-radius:12px;border:none;font-weight:600;cursor:pointer;">Request to Join</button>
+                    </form>
+                    <form asp-action="Leave" asp-route-id="@Model.Id" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" style="background:transparent;color:#e9d5ff;padding:10px 18px;border-radius:12px;border:1.5px solid #a855f7;font-weight:600;cursor:pointer;">Leave</button>
+                    </form>
+                }
+
+                <a asp-action="Index" style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;padding:10px 18px;border-radius:12px;text-decoration:none;font-weight:600;">Back</a>
+            </div>
+
+            @if (isLeader)
+            {
+                <style>
+                    .profile-picker {
+                        position: relative;
+                    }
+
+                    .profile-results {
+                        display: none;
+                        position: absolute;
+                        z-index: 20;
+                        left: 0;
+                        right: 0;
+                        top: 74px;
+                        max-height: 255px;
+                        overflow-y: auto;
+                        background: linear-gradient(135deg, #f5f3ff, #ede9fe, #ddd6fe);
+                        border: 1px solid rgba(124, 58, 237, 0.28);
+                        border-radius: 12px;
+                        box-shadow: 0 18px 42px rgba(76, 29, 149, 0.22);
+                        padding: 8px;
+                    }
+
+                    .profile-result {
+                        width: 100%;
+                        display: flex;
+                        gap: 10px;
+                        align-items: center;
+                        padding: 10px;
+                        border: 0;
+                        border-radius: 10px;
+                        background: rgba(255, 255, 255, 0.55);
+                        border: 1px solid transparent;
+                        text-align: left;
+                        cursor: pointer;
+                        transition: 0.2s ease;
+                    }
+
+                    .profile-result:hover,
+                    .profile-result:focus {
+                        background: rgba(196, 181, 253, 0.38);
+                        border-color: rgba(124, 58, 237, 0.28);
+                        outline: none;
+                    }
+
+                    .profile-avatar {
+                        width: 38px;
+                        height: 38px;
+                        border-radius: 50%;
+                        object-fit: cover;
+                        flex: 0 0 38px;
+                        background: linear-gradient(135deg, #7c3aed, #a855f7);
+                        color: #fff;
+                        border: 1px solid rgba(233, 213, 255, 0.45);
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: 700;
+                    }
+
+                    .profile-result-name {
+                        color: #312e81;
+                        display: block;
+                        font-weight: 700;
+                        line-height: 1.2;
+                    }
+
+                    .profile-result-meta {
+                        color: #6d28d9;
+                        display: block;
+                        font-size: 12px;
+                        line-height: 1.3;
+                    }
+
+                    .selected-profile {
+                        display: none;
+                        gap: 10px;
+                        align-items: center;
+                        margin: 10px 0 12px;
+                        padding: 10px;
+                        border-radius: 12px;
+                        background: rgba(255, 255, 255, 0.1);
+                        border: 1px solid rgba(196, 181, 253, 0.35);
+                    }
+
+                    .selected-profile strong {
+                        color: #fff;
+                        display: block;
+                        line-height: 1.2;
+                    }
+
+                    .selected-profile span {
+                        color: #ddd6fe;
+                        display: block;
+                        font-size: 12px;
+                    }
+
+                    @@media (max-width: 767px) {
+                        .leader-request-grid {
+                            grid-template-columns: 1fr !important;
+                        }
+                    }
+                </style>
+
+                <div class="leader-request-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+                    <form asp-controller="TARequest" asp-action="Send" method="post" style="background:rgba(196,181,253,0.12);border-radius:18px;padding:18px;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="teamId" value="@Model.Id" />
+                        <input type="hidden" name="TAId" data-profile-id="ta" />
+                        <div class="profile-picker" data-picker="ta">
+                            <label style="color:#c4b5fd;">TA Name</label>
+                            <input type="search" data-profile-search="ta" autocomplete="off" style="width:100%;padding:10px;margin:6px 0 0;border-radius:10px;border:1px solid #7c3aed;background:transparent;color:white;" />
+                            <div class="profile-results" data-profile-results="ta"></div>
+                        </div>
+                        <div class="selected-profile" data-selected-profile="ta"></div>
+                        <label style="color:#c4b5fd;">Message</label>
+                        <textarea name="Message" rows="2" style="width:100%;padding:10px;margin:6px 0 12px;border-radius:10px;border:1px solid #7c3aed;background:transparent;color:white;"></textarea>
+                        <button type="submit" style="width:100%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;padding:10px;border:none;border-radius:12px;font-weight:600;">Send TA Request</button>
+                    </form>
+
+                    <form asp-controller="DoctorRequest" asp-action="Send" method="post" style="background:rgba(196,181,253,0.12);border-radius:18px;padding:18px;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="TeamId" value="@Model.Id" />
+                        <input type="hidden" name="DoctorId" data-profile-id="doctor" />
+                        <div class="profile-picker" data-picker="doctor">
+                            <label style="color:#c4b5fd;">Doctor Name</label>
+                            <input type="search" data-profile-search="doctor" autocomplete="off" style="width:100%;padding:10px;margin:6px 0 0;border-radius:10px;border:1px solid #7c3aed;background:transparent;color:white;" />
+                            <div class="profile-results" data-profile-results="doctor"></div>
+                        </div>
+                        <div class="selected-profile" data-selected-profile="doctor"></div>
+                        <label style="color:#c4b5fd;">Message</label>
+                        <textarea name="Message" rows="2" style="width:100%;padding:10px;margin:6px 0 12px;border-radius:10px;border:1px solid #7c3aed;background:transparent;color:white;"></textarea>
+                        <button type="submit" style="width:100%;background:linear-gradient(135deg,#7c3aed,#a855f7);color:white;padding:10px;border:none;border-radius:12px;font-weight:600;">Send Doctor Request</button>
+                    </form>
+
+                    <form asp-action="AddMember" asp-route-id="@Model.Id" method="post" style="background:rgba(196,181,253,0.12);border-radius:18px;padding:18px;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="userId" data-profile-id="student-add" />
+                        <div class="profile-picker" data-picker="student-add">
+                            <label style="color:#c4b5fd;">Student Name</label>
+                            <input type="search" data-profile-search="student-add" autocomplete="off" style="width:100%;padding:10px;margin:6px 0 0;border-radius:10px;border:1px solid #7c3aed;background:transparent;color:white;" />
+                            <div class="profile-results" data-profile-results="student-add"></div>
+                        </div>
+                        <div class="selected-profile" data-selected-profile="student-add"></div>
+                        <button type="submit" style="width:100%;background:transparent;color:#e9d5ff;padding:10px;border-radius:12px;border:1.5px solid #a855f7;font-weight:600;">Add Member</button>
+                    </form>
+
+                    <form asp-action="AssignLeader" asp-route-id="@Model.Id" method="post" style="background:rgba(196,181,253,0.12);border-radius:18px;padding:18px;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="userId" data-profile-id="student-leader" />
+                        <div class="profile-picker" data-picker="student-leader">
+                            <label style="color:#c4b5fd;">New Leader Name</label>
+                            <input type="search" data-profile-search="student-leader" autocomplete="off" style="width:100%;padding:10px;margin:6px 0 0;border-radius:10px;border:1px solid #7c3aed;background:transparent;color:white;" />
+                            <div class="profile-results" data-profile-results="student-leader"></div>
+                        </div>
+                        <div class="selected-profile" data-selected-profile="student-leader"></div>
+                        <button type="submit" style="width:100%;background:transparent;color:#e9d5ff;padding:10px;border-radius:12px;border:1.5px solid #a855f7;font-weight:600;">Assign Leader</button>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const requestProfiles = {
+    ta: @Html.Raw(JsonSerializer.Serialize(tas.Select(ta => new
+        {
+            id = ta.Id,
+            name = ta.FullName,
+            email = ta.Email,
+            image = ta.ProfileImageUrl,
+            meta = $"{ta.Department} - {ta.AvailableSlots} slots"
+        }), profileJsonOptions)),
+    doctor: @Html.Raw(JsonSerializer.Serialize(doctors.Select(doctor => new
+        {
+            id = doctor.Id,
+            name = doctor.FullName,
+            email = doctor.Email,
+            image = doctor.ProfileImageUrl,
+            meta = $"{doctor.Department} - {doctor.AvailableTeams} teams"
+        }), profileJsonOptions)),
+    "student-add": @Html.Raw(JsonSerializer.Serialize(students.Select(student => new
+        {
+            id = student.Id,
+            name = $"{student.FirstName} {student.LastName}",
+            email = student.Email,
+            image = student.ProfileImageUrl,
+            meta = student.Role
+        }), profileJsonOptions)),
+    "student-leader": @Html.Raw(JsonSerializer.Serialize(students.Select(student => new
+        {
+            id = student.Id,
+            name = $"{student.FirstName} {student.LastName}",
+            email = student.Email,
+            image = student.ProfileImageUrl,
+            meta = student.Role
+        }), profileJsonOptions))
+};
+
+function profileInitials(name) {
+    return (name || '?')
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(part => part[0])
+        .join('')
+        .toUpperCase();
+}
+
+function escapeHtml(value) {
+    return String(value || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
+
+function escapeAttribute(value) {
+    return escapeHtml(value).replaceAll('`', '&#096;');
+}
+
+function profileAvatar(profile) {
+    if (profile.image) {
+        return `<img class="profile-avatar" src="${escapeAttribute(profile.image)}" alt="">`;
+    }
+
+    return `<span class="profile-avatar">${escapeHtml(profileInitials(profile.name))}</span>`;
+}
+
+function renderProfileResults(type, query = '') {
+    const results = document.querySelector(`[data-profile-results="${type}"]`);
+    const profiles = requestProfiles[type] || [];
+    const normalizedQuery = query.trim().toLowerCase();
+    const matches = profiles
+        .filter(profile =>
+            !normalizedQuery ||
+            profile.name.toLowerCase().includes(normalizedQuery) ||
+            profile.email.toLowerCase().includes(normalizedQuery))
+        .slice(0, 8);
+
+    results.innerHTML = matches.length
+        ? matches.map(profile => `
+            <button class="profile-result" type="button" data-profile-choice="${escapeAttribute(type)}" data-profile-id="${escapeAttribute(profile.id)}">
+                ${profileAvatar(profile)}
+                <span>
+                    <span class="profile-result-name">${escapeHtml(profile.name)}</span>
+                    <span class="profile-result-meta">${escapeHtml(profile.email)}</span>
+                    <span class="profile-result-meta">${escapeHtml(profile.meta)}</span>
+                </span>
+            </button>
+        `).join('')
+        : '<div class="profile-result-meta" style="padding:10px;">No profiles found</div>';
+
+    results.style.display = 'block';
+}
+
+function selectProfile(type, profile) {
+    const idInput = document.querySelector(`[data-profile-id="${type}"]`);
+    const searchInput = document.querySelector(`[data-profile-search="${type}"]`);
+    const selected = document.querySelector(`[data-selected-profile="${type}"]`);
+    const results = document.querySelector(`[data-profile-results="${type}"]`);
+
+    idInput.value = profile.id;
+    searchInput.value = profile.name;
+    selected.innerHTML = `
+        ${profileAvatar(profile)}
+        <span>
+            <strong>${escapeHtml(profile.name)}</strong>
+            <span>${escapeHtml(profile.email)}</span>
+            <span>${escapeHtml(profile.meta)}</span>
+        </span>
+    `;
+    selected.style.display = 'flex';
+    results.style.display = 'none';
+}
+
+document.querySelectorAll('[data-profile-search]').forEach(input => {
+    const type = input.dataset.profileSearch;
+
+    input.addEventListener('focus', () => renderProfileResults(type, input.value));
+    input.addEventListener('input', () => {
+        document.querySelector(`[data-profile-id="${type}"]`).value = '';
+        document.querySelector(`[data-selected-profile="${type}"]`).style.display = 'none';
+        renderProfileResults(type, input.value);
+    });
+});
+
+document.addEventListener('click', event => {
+    const choice = event.target.closest('[data-profile-choice]');
+
+    if (choice) {
+        const type = choice.dataset.profileChoice;
+        const profile = (requestProfiles[type] || []).find(item => item.id === choice.dataset.profileId);
+        if (profile) selectProfile(type, profile);
+        return;
+    }
+
+    if (!event.target.closest('.profile-picker')) {
+        document.querySelectorAll('.profile-results').forEach(result => result.style.display = 'none');
+    }
+});
+
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', event => {
+        const idInput = form.querySelector('[data-profile-id]');
+        if (!idInput || idInput.value) return;
+
+        event.preventDefault();
+        const searchInput = form.querySelector('[data-profile-search]');
+        searchInput?.focus();
+    });
+});
+
+function deleteTeam(teamId) {
+    if (!confirm('Delete this team?')) return;
+    fetch('/Team/delete/' + teamId, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) window.location.href = '/Team';
+        else alert(data.message || 'Delete failed');
+    })
+    .catch(() => alert('Request failed'));
+}
+</script>
+}

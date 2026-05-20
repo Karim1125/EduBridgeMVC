@@ -3,17 +3,23 @@ using System.Linq;
 using System.Security.Claims;
 using EduBridgeMVC.Contracts.Authentication;
 using EduBridgeMVC.Services.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using LoginRequest = Microsoft.AspNetCore.Identity.Data.LoginRequest;
+using SharpGrip.FluentValidation.AutoValidation.Mvc.Attributes;
 
 namespace EduBridgeMVC.Controllers;
 
 [Route("[controller]")]
-public class AuthController(IAuthService authService, ITaService taService, ILogger<AuthController> logger) : Controller
+public class AuthController(
+    IAuthService authService,
+    ITaService taService,
+    IValidator<RegisterRequest> registerValidator,
+    ILogger<AuthController> logger) : Controller
 {
     private readonly IAuthService _authService = authService;
     private readonly ITaService _taService = taService;
+    private readonly IValidator<RegisterRequest> _registerValidator = registerValidator;
     private readonly ILogger<AuthController> _logger = logger;
 
     [HttpGet("login")]
@@ -22,7 +28,8 @@ public class AuthController(IAuthService authService, ITaService taService, ILog
         if (!string.IsNullOrEmpty(HttpContext.Session.GetString("token")))
             return RedirectToAction("Index", "Home");
 
-        return View();
+        var rememberedEmail = Request.Cookies["rememberedEmail"] ?? string.Empty;
+        return View(new LoginRequest(rememberedEmail, string.Empty, !string.IsNullOrEmpty(rememberedEmail)));
     }
 
     [HttpPost("login")]
@@ -41,6 +48,28 @@ public class AuthController(IAuthService authService, ITaService taService, ILog
 
         HttpContext.Session.SetString("token", result.Value.Token);
         HttpContext.Session.SetString("refreshToken", result.Value.RefreshToken);
+
+        if (request.RememberMe)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddDays(30),
+                HttpOnly = true,
+                IsEssential = true,
+                SameSite = SameSiteMode.Lax,
+                Secure = Request.IsHttps
+            };
+
+            Response.Cookies.Append("rememberedToken", result.Value.Token, cookieOptions);
+            Response.Cookies.Append("rememberedRefreshToken", result.Value.RefreshToken, cookieOptions);
+            Response.Cookies.Append("rememberedEmail", request.Email, cookieOptions);
+        }
+        else
+        {
+            Response.Cookies.Delete("rememberedToken");
+            Response.Cookies.Delete("rememberedRefreshToken");
+            Response.Cookies.Delete("rememberedEmail");
+        }
 
         var handler = new JwtSecurityTokenHandler();
         var jwt = handler.ReadJwtToken(result.Value.Token);
@@ -84,6 +113,9 @@ public class AuthController(IAuthService authService, ITaService taService, ILog
     public IActionResult Logout()
     {
         HttpContext.Session.Clear();
+        Response.Cookies.Delete("rememberedToken");
+        Response.Cookies.Delete("rememberedRefreshToken");
+        Response.Cookies.Delete("rememberedEmail");
         return RedirectToAction("Login");
     }
 
@@ -92,21 +124,61 @@ public class AuthController(IAuthService authService, ITaService taService, ILog
 
     [HttpPost("register")]
     [DisableRateLimiting]
-    public async Task<IActionResult> Register(RegisterRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Register([AutoValidateNever] RegisterRequest request, CancellationToken cancellationToken)
     {
+        var validationResult = await _registerValidator.ValidateAsync(request, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            foreach (var error in validationResult.Errors)
+                ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+
+            return View(GetRegisterErrorModel(request));
+        }
+
         if (!ModelState.IsValid)
-            return View(request);
+            return View(GetRegisterErrorModel(request));
 
         var result = await _authService.RegisterAsync(request, cancellationToken);
 
         if (!result.IsSuccess)
         {
             ModelState.AddModelError("", result.Error.Description);
-            return View(request);
+            return View(GetRegisterErrorModel(request));
         }
 
         TempData["Success"] = "Check your email to confirm your account";
         return RedirectToAction("Login");
+    }
+
+    private RegisterRequest GetRegisterErrorModel(RegisterRequest request)
+    {
+        ModelState.Remove(nameof(RegisterRequest.Password));
+        ModelState.Remove(nameof(RegisterRequest.ConfirmPassword));
+        ModelState.Remove(nameof(RegisterRequest.ProfileImage));
+
+        var persistedImage = request.ProfileImage is { Length: > 0 }
+            ? GetProfileImageDataUrl(request.ProfileImage)
+            : request.PersistedProfileImageDataUrl;
+
+        return request with
+        {
+            Password = string.Empty,
+            ConfirmPassword = string.Empty,
+            ProfileImage = null,
+            PersistedProfileImageDataUrl = persistedImage
+        };
+    }
+
+    private static string? GetProfileImageDataUrl(IFormFile image)
+    {
+        if (image.Length == 0 || !image.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        using var stream = image.OpenReadStream();
+        using var memoryStream = new MemoryStream();
+        stream.CopyTo(memoryStream);
+
+        return $"data:{image.ContentType};base64,{Convert.ToBase64String(memoryStream.ToArray())}";
     }
 
     [HttpGet("confirm-email")]

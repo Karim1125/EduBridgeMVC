@@ -19,6 +19,7 @@ public class EmailService(IOptions<MailSettings> mailSettings, ILogger<EmailServ
             Subject = subject
         };
 
+        message.From.Add(new MailboxAddress(_mailSettings.DisplayName, _mailSettings.Mail));
         message.To.Add(MailboxAddress.Parse(email));
 
         var builder = new BodyBuilder
@@ -32,9 +33,20 @@ public class EmailService(IOptions<MailSettings> mailSettings, ILogger<EmailServ
 
         logger.LogInformation("Sending email to {Email}", email);
 
-        await smtp.ConnectAsync(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls);
-        await smtp.AuthenticateAsync(_mailSettings.Mail, _mailSettings.Password);
-        await smtp.SendAsync(message);
-        await smtp.DisconnectAsync(true);
+        try
+        {
+            await smtp.ConnectAsync(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls);
+            await smtp.AuthenticateAsync(_mailSettings.Mail, _mailSettings.Password);
+            await smtp.SendAsync(message);
+            await smtp.DisconnectAsync(true);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to send email to {Email} using SMTP host {Host}:{Port}",
+                email, _mailSettings.Host, _mailSettings.Port);
+
+            throw new InvalidOperationException(
+                "Email could not be sent. Please check the SMTP settings and internet connection.", ex);
+        }
     }
 }

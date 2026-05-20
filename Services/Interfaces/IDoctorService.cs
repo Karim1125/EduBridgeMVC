@@ -9,6 +9,7 @@ public interface IDoctorService
     // Queries
     Task<Result<IEnumerable<DoctorResponse>>> GetAllAsync(CancellationToken cancellationToken = default);
     Task<Result<DoctorResponse>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Result<DoctorResponse>> GetCurrentAsync(CancellationToken cancellationToken = default);
     Task<Result<IEnumerable<DoctorResponse>>> GetAvailableDoctorsAsync(CancellationToken cancellationToken = default);
     Task<Result<IEnumerable<TeamResponse>>> GetSupervisedTeamsAsync(CancellationToken cancellationToken = default);
 

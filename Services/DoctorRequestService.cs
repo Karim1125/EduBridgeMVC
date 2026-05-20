@@ -23,6 +23,15 @@ public class DoctorRequestService(
     public async Task<Result> CreateRequestAsync(
         SendDoctorRequestRequest request, CancellationToken cancellationToken = default)
     {
+        var team = await context.Teams
+            .FirstOrDefaultAsync(t => t.Id == request.TeamId, cancellationToken);
+
+        if (team is null)
+            return Result.Failure(TeamErrors.TeamNotFound);
+
+        if (team.LeaderId != CurrentUserId)
+            return Result.Failure(TeamErrors.NotTeamLeader);
+
         var doctor = await context.Doctors
             .Include(d => d.User)
             .FirstOrDefaultAsync(d => d.Id == request.DoctorId, cancellationToken);
@@ -160,6 +169,15 @@ public class DoctorRequestService(
     public async Task<Result<IEnumerable<DoctorRequestResponse>>> GetTeamRequestsAsync(
         Guid teamId, CancellationToken cancellationToken = default)
     {
+        var team = await context.Teams
+            .FirstOrDefaultAsync(t => t.Id == teamId, cancellationToken);
+
+        if (team is null)
+            return Result.Failure<IEnumerable<DoctorRequestResponse>>(TeamErrors.TeamNotFound);
+
+        if (team.LeaderId != CurrentUserId)
+            return Result.Failure<IEnumerable<DoctorRequestResponse>>(TeamErrors.NotTeamLeader);
+
         var requests = await context.DoctorRequests
             .AsNoTracking()
             .Include(r => r.Team)
@@ -173,6 +191,15 @@ public class DoctorRequestService(
     public async Task<Result<IEnumerable<DoctorRequestResponse>>> GetDoctorRequestsAsync(
         Guid doctorId, CancellationToken cancellationToken = default)
     {
+        var doctor = await context.Doctors
+            .FirstOrDefaultAsync(d => d.Id == doctorId, cancellationToken);
+
+        if (doctor is null)
+            return Result.Failure<IEnumerable<DoctorRequestResponse>>(DoctorErrors.DoctorNotFound);
+
+        if (doctor.UserId != CurrentUserId)
+            return Result.Failure<IEnumerable<DoctorRequestResponse>>(DoctorRequestErrors.Unauthorized);
+
         var requests = await context.DoctorRequests
             .AsNoTracking()
             .Include(r => r.Team)

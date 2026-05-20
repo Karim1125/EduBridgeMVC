@@ -197,11 +197,33 @@ public class AuthService(
             user.ProfileImageUrl = $"/images/profiles/{fileName}";
             await userManager.UpdateAsync(user);
         }
+        else if (!string.IsNullOrWhiteSpace(request.PersistedProfileImageDataUrl))
+        {
+            var imageBytes = GetImageBytes(request.PersistedProfileImageDataUrl, out var extension);
+            if (imageBytes is { Length: > 0 })
+            {
+                var uploadsFolder = Path.Combine("wwwroot", "images", "profiles");
+                Directory.CreateDirectory(uploadsFolder);
+                var fileName = $"{user.Id}_{Guid.NewGuid()}{extension}";
+                var filePath = Path.Combine(uploadsFolder, fileName);
+                await File.WriteAllBytesAsync(filePath, imageBytes, cancellationToken);
+                user.ProfileImageUrl = $"/images/profiles/{fileName}";
+                await userManager.UpdateAsync(user);
+            }
+        }
 
         var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
-        await SendConfirmationEmail(user, code);
+        try
+        {
+            await SendConfirmationEmail(user, code);
+        }
+        catch (InvalidOperationException ex)
+        {
+            logger.LogError(ex, "Failed to send confirmation email to {Email}", user.Email);
+            return Result.Failure(UserErrors.EmailDeliveryFailed);
+        }
 
         return Result.Success();
     }
@@ -209,7 +231,34 @@ public class AuthService(
     var error = result.Errors.First();
 
     return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
-}
+	}
+
+    private static byte[]? GetImageBytes(string dataUrl, out string extension)
+    {
+        extension = ".jpg";
+
+        var commaIndex = dataUrl.IndexOf(',');
+        if (commaIndex < 0 || !dataUrl.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        var metadata = dataUrl[..commaIndex];
+        extension = metadata.Contains("png", StringComparison.OrdinalIgnoreCase)
+            ? ".png"
+            : metadata.Contains("gif", StringComparison.OrdinalIgnoreCase)
+                ? ".gif"
+                : metadata.Contains("webp", StringComparison.OrdinalIgnoreCase)
+                    ? ".webp"
+                    : ".jpg";
+
+        try
+        {
+            return Convert.FromBase64String(dataUrl[(commaIndex + 1)..]);
+        }
+        catch (FormatException)
+        {
+            return null;
+        }
+    }
 
     public async Task<Result> ConfirmEmailAsync(ConfirmEmailRequest request)
 {
@@ -254,7 +303,15 @@ public class AuthService(
 
         logger.LogInformation("Confirmation code: {code}", code);
 
-        await SendConfirmationEmail(user, code);
+        try
+        {
+            await SendConfirmationEmail(user, code);
+        }
+        catch (InvalidOperationException ex)
+        {
+            logger.LogError(ex, "Failed to resend confirmation email to {Email}", user.Email);
+            return Result.Failure(UserErrors.EmailDeliveryFailed);
+        }
 
         return Result.Success();
     }
@@ -272,7 +329,15 @@ public class AuthService(
 
         logger.LogInformation("Reset code: {code}", code);
 
-        await SendResetPasswordEmail(user, code);
+        try
+        {
+            await SendResetPasswordEmail(user, code);
+        }
+        catch (InvalidOperationException ex)
+        {
+            logger.LogError(ex, "Failed to send password reset email to {Email}", user.Email);
+            return Result.Failure(UserErrors.EmailDeliveryFailed);
+        }
 
         return Result.Success();
     }

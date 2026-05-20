@@ -57,6 +57,30 @@ public class TaService(
         return Result.Success(response);
     }
 
+    public async Task<Result<TAResponse>> GetCurrentAsync(
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(CurrentUserId))
+            return Result.Failure<TAResponse>(TaErrors.UserNotFound);
+
+        var ta = await context.TeachingAssistants
+            .AsNoTracking()
+            .Include(ta => ta.User)
+            .FirstOrDefaultAsync(ta => ta.UserId == CurrentUserId && !ta.IsDeleted, cancellationToken);
+
+        if (ta is null)
+            return Result.Failure<TAResponse>(TaErrors.TaNotFound);
+
+        var avgResult = await ratingService.GetAverageAsync(ta.Id, cancellationToken);
+
+        var response = mapper.Map<TAResponse>(ta) with
+        {
+            AverageRating = avgResult.IsSuccess ? avgResult.Value : 0
+        };
+
+        return Result.Success(response);
+    }
+
     public async Task<Result<IEnumerable<TAResponse>>> GetAvailableTAsAsync(
         CancellationToken cancellationToken = default)
     {
@@ -85,6 +109,8 @@ public class TaService(
             .AsNoTracking()
             .Include(t => t.Members)
             .Include(t => t.Leader)
+            .Include(t => t.Ta).ThenInclude(ta => ta!.User)
+            .Include(t => t.Doctor).ThenInclude(d => d!.User)
             .Where(t => t.TaId == ta.Id)
             .ToListAsync(cancellationToken);
 

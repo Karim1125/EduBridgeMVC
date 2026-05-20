@@ -9,6 +9,7 @@ public interface ITaService
     // Queries
     Task<Result<IEnumerable<TAResponse>>> GetAllTAsAsync(CancellationToken cancellationToken = default);
     Task<Result<TAResponse>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Result<TAResponse>> GetCurrentAsync(CancellationToken cancellationToken = default);
     Task<Result<IEnumerable<TAResponse>>> GetAvailableTAsAsync(CancellationToken cancellationToken = default);
     Task<Result<IEnumerable<TeamResponse>>> GetSupervisedTeamsAsync(CancellationToken cancellationToken = default);
 

@@ -8,5 +8,7 @@ public record LoginRequest(
     string Email,
 
     [Required(ErrorMessage = "Password is required")]
-    string Password
+    string Password,
+
+    bool RememberMe = false
 );

@@ -1,4 +1,5 @@
 using EduBridgeMVC.Contracts.Doctor;
+using EduBridgeMVC.Contracts.Team;
 using EduBridgeMVC.Extensions;
 using EduBridgeMVC.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -7,12 +8,15 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace EduBridgeMVC.Controllers;
 
-[Authorize(Roles = "Doctor,Admin")]
+[Authorize]
 [Route("[controller]")]
 public class DoctorController(IDoctorService doctorService, IUserService userService) : Controller
 {
     private readonly IDoctorService _doctorService = doctorService;
     private readonly IUserService _userService = userService;
+
+    private bool CanManageProfile(string userId) =>
+        User.IsInRole("Admin") || User.GetUserId() == userId;
 
     // Redirect Doctor users who haven't created a profile yet
     public override async Task OnActionExecutionAsync(
@@ -49,6 +53,36 @@ public class DoctorController(IDoctorService doctorService, IUserService userSer
         return View(result.Value);
     }
 
+    [HttpGet("available")]
+    public async Task<IActionResult> Available(CancellationToken cancellationToken)
+    {
+        var result = await _doctorService.GetAvailableDoctorsAsync(cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Error.Description;
+            return View(nameof(Index), Enumerable.Empty<DoctorResponse>());
+        }
+
+        ViewData["ListTitle"] = "Available Doctors";
+        return View(nameof(Index), result.Value);
+    }
+
+    [Authorize(Roles = "Doctor")]
+    [HttpGet("supervised-teams")]
+    public async Task<IActionResult> SupervisedTeams(CancellationToken cancellationToken)
+    {
+        var result = await _doctorService.GetSupervisedTeamsAsync(cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Error.Description;
+            return View(Enumerable.Empty<TeamResponse>());
+        }
+
+        return View(result.Value);
+    }
+
     [HttpGet("details/{id:guid}")]
     public async Task<IActionResult> Details(Guid id, CancellationToken cancellationToken)
     {
@@ -63,10 +97,12 @@ public class DoctorController(IDoctorService doctorService, IUserService userSer
         return View(result.Value);
     }
 
+    [Authorize(Roles = "Doctor")]
     [HttpGet("create")]
     public IActionResult Create() =>
         View(new CreateDoctorRequest(string.Empty, null, null, 0));
 
+    [Authorize(Roles = "Doctor")]
     [HttpPost("create")]
     public async Task<IActionResult> Create(CreateDoctorRequest request, CancellationToken cancellationToken)
     {
@@ -86,6 +122,7 @@ public class DoctorController(IDoctorService doctorService, IUserService userSer
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Doctor,Admin")]
     [HttpGet("edit/{id:guid}")]
     public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken)
     {
@@ -97,6 +134,9 @@ public class DoctorController(IDoctorService doctorService, IUserService userSer
             return RedirectToAction(nameof(Index));
         }
 
+        if (!CanManageProfile(result.Value.UserId))
+            return Forbid();
+
         var request = new UpdateDoctorRequest(
             result.Value.Department,
             result.Value.AcademicTitle,
@@ -107,11 +147,22 @@ public class DoctorController(IDoctorService doctorService, IUserService userSer
         return View(request);
     }
 
+    [Authorize(Roles = "Doctor,Admin")]
     [HttpPost("edit/{id:guid}")]
     public async Task<IActionResult> Edit(Guid id, UpdateDoctorRequest request, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
             return View(request);
+
+        var doctorResult = await _doctorService.GetByIdAsync(id, cancellationToken);
+        if (!doctorResult.IsSuccess)
+        {
+            TempData["Error"] = doctorResult.Error.Description;
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (!CanManageProfile(doctorResult.Value.UserId))
+            return Forbid();
 
         var result = await _doctorService.UpdateAsync(id, request, cancellationToken);
 
@@ -125,6 +176,7 @@ public class DoctorController(IDoctorService doctorService, IUserService userSer
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Doctor,Admin")]
     [HttpPost("upload-image/{id:guid}")]
     public async Task<IActionResult> UploadImage(Guid id, IFormFile image, CancellationToken cancellationToken)
     {
@@ -140,6 +192,9 @@ public class DoctorController(IDoctorService doctorService, IUserService userSer
             TempData["Error"] = doctorResult.Error.Description;
             return RedirectToAction(nameof(Index));
         }
+
+        if (!CanManageProfile(doctorResult.Value.UserId))
+            return Forbid();
 
         var result = await _userService.UploadProfileImageAsync(doctorResult.Value.UserId, image, cancellationToken);
 

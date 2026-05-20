@@ -33,5 +33,6 @@ public record RegisterRequest(
     string? GitHubUrl,
     string? LinkedInUrl,
     string? SecurityCode,
+    string? PersistedProfileImageDataUrl,
     IFormFile? ProfileImage
 );

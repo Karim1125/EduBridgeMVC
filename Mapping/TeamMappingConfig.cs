@@ -14,5 +14,9 @@ public class TeamMappingConfig : IRegister
             .Map(dest => dest.TaName, src => src.Ta != null ? $"{src.Ta.User.FirstName} {src.Ta.User.LastName}" : null)
             .Map(dest => dest.DoctorName,
                 src => src.Doctor != null ? $"{src.Doctor.User.FirstName} {src.Doctor.User.LastName}" : null);
+
+        config.NewConfig<TeamMember, TeamMemberResponse>()
+            .Map(dest => dest.FullName, src => $"{src.User.FirstName} {src.User.LastName}")
+            .Map(dest => dest.ProfileImageUrl, src => src.User.ProfileImageUrl);
     }
 }

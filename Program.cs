@@ -48,6 +48,15 @@ try
     {
         var token = context.Session.GetString("token");
 
+        if (string.IsNullOrEmpty(token) && context.Request.Cookies.TryGetValue("rememberedToken", out var rememberedToken))
+        {
+            token = rememberedToken;
+            context.Session.SetString("token", rememberedToken);
+
+            if (context.Request.Cookies.TryGetValue("rememberedRefreshToken", out var rememberedRefreshToken))
+                context.Session.SetString("refreshToken", rememberedRefreshToken);
+        }
+
         if (!string.IsNullOrEmpty(token))
         {
             context.Request.Headers["Authorization"] = $"Bearer {token}";

@@ -8,6 +8,7 @@ public interface ITeamService
     // Queries
     Task<Result<TeamResponse>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<Result<IEnumerable<TeamResponse>>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<Result<IEnumerable<TeamMemberResponse>>> GetMembersAsync(Guid id, CancellationToken cancellationToken = default);
 
     // Team management
     Task<Result<TeamResponse>> CreateAsync(CreateTeamRequest request, CancellationToken cancellationToken = default);

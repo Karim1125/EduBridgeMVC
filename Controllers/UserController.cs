@@ -1,3 +1,4 @@
+using EduBridgeMVC.Abstractions.Consts;
 using EduBridgeMVC.Contracts.User;
 using EduBridgeMVC.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -32,9 +33,25 @@ public class UserController(IUserService userService) : Controller
         return RedirectToAction(nameof(Details), new { id });
     }
 
-    [Authorize(Roles = "Admin")]
     [HttpGet("")]
     public async Task<IActionResult> Index(CancellationToken cancellationToken) { var result = await _userService.GetAllUsersAsync(cancellationToken); if (!result.IsSuccess) { TempData["Error"] = result.Error.Description; return View(Enumerable.Empty<UserResponse>()); } return View(result.Value); }
+
+    [HttpGet("students")]
+    public async Task<IActionResult> Students(CancellationToken cancellationToken)
+    {
+        var result = await _userService.GetAllUsersAsync(cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            TempData["Error"] = result.Error.Description;
+            return View(nameof(Index), Enumerable.Empty<UserResponse>());
+        }
+
+        ViewData["ListTitle"] = "Students";
+
+        return View(nameof(Index), result.Value
+            .Where(user => user.Role == DefaultRoles.Student));
+    }
 
     [HttpGet("details/{id}")]
     public async Task<IActionResult> Details(string id, CancellationToken cancellationToken)

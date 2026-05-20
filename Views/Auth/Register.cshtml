@@ -46,7 +46,7 @@
     <!-- Profile Image Upload -->
     <div style="text-align:center; margin-bottom:25px;">
         <div style="position:relative; display:inline-block;">
-            <img id="previewAvatar" src="/img/default.png"
+            <img id="previewAvatar" src="@(Model?.PersistedProfileImageDataUrl ?? "/img/default.png")"
                  style="width:110px;height:110px;border-radius:50%;object-fit:cover;
                         border:3px solid #a855f7;box-shadow:0 0 20px rgba(168,85,247,0.4);" />
             <label for="profileImageInput" title="Upload photo"
@@ -57,6 +57,7 @@
             </label>
             <input id="profileImageInput" asp-for="ProfileImage" type="file" accept="image/*"
                    style="display:none;" onchange="previewImage(this)" />
+            <input type="hidden" asp-for="PersistedProfileImageDataUrl" id="persistedProfileImage" />
         </div>
         <p style="margin:8px 0 0;font-size:13px;color:#7e22ce;">Profile photo (optional)</p>
     </div>
@@ -90,19 +91,33 @@
 
     <!-- Password -->
     <div style="margin-top:20px;">
-        <input asp-for="Password" type="password" placeholder="Password"
-               onfocus="this.style.borderBottom='2px solid #a855f7'"
-               onblur="this.style.borderBottom='2px solid #7e22ce'"
-               style="width:100%; border:none; border-bottom:2px solid #7e22ce; background:transparent; padding:10px; outline:none; color:#6b21a8;" class="form-control" />
+        <div style="display:flex;align-items:center;gap:8px;border-bottom:2px solid #7e22ce;">
+            <input asp-for="Password" type="password" placeholder="Password"
+                   onfocus="this.parentElement.style.borderBottom='2px solid #a855f7'"
+                   onblur="this.parentElement.style.borderBottom='2px solid #7e22ce'"
+                   style="width:100%; border:none; background:transparent; padding:10px; outline:none; color:#6b21a8;" class="form-control" />
+            <button type="button" data-toggle-password="Password"
+                    aria-label="Show password"
+                    style="background:transparent;border:none;color:#7e22ce;cursor:pointer;padding:8px;width:38px;">
+                <i class="fa fa-eye"></i>
+            </button>
+        </div>
         <span asp-validation-for="Password" style="color:#dc2626; font-size:12px;"></span>
     </div>
 
     <!-- Confirm -->
     <div style="margin-top:20px;">
-        <input asp-for="ConfirmPassword" type="password" placeholder="Confirm Password"
-               onfocus="this.style.borderBottom='2px solid #a855f7'"
-               onblur="this.style.borderBottom='2px solid #7e22ce'"
-               style="width:100%; border:none; border-bottom:2px solid #7e22ce; background:transparent; padding:10px; outline:none; color:#6b21a8;" class="form-control" />
+        <div style="display:flex;align-items:center;gap:8px;border-bottom:2px solid #7e22ce;">
+            <input asp-for="ConfirmPassword" type="password" placeholder="Confirm Password"
+                   onfocus="this.parentElement.style.borderBottom='2px solid #a855f7'"
+                   onblur="this.parentElement.style.borderBottom='2px solid #7e22ce'"
+                   style="width:100%; border:none; background:transparent; padding:10px; outline:none; color:#6b21a8;" class="form-control" />
+            <button type="button" data-toggle-password="ConfirmPassword"
+                    aria-label="Show password"
+                    style="background:transparent;border:none;color:#7e22ce;cursor:pointer;padding:8px;width:38px;">
+                <i class="fa fa-eye"></i>
+            </button>
+        </div>
         <span asp-validation-for="ConfirmPassword" style="color:#dc2626; font-size:12px;"></span>
     </div>
 
@@ -208,15 +223,16 @@
 }
 
 <script>
-function previewImage(input) {
-    if (input.files && input.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('previewAvatar').src = e.target.result;
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-}
+	function previewImage(input) {
+	    if (input.files && input.files[0]) {
+	        var reader = new FileReader();
+	        reader.onload = function(e) {
+	            document.getElementById('previewAvatar').src = e.target.result;
+	            document.getElementById('persistedProfileImage').value = e.target.result;
+	        };
+	        reader.readAsDataURL(input.files[0]);
+	    }
+	}
 
 function selectRole(btn, role) {
     document.getElementById("roleInput").value = role;
@@ -238,5 +254,26 @@ function selectRole(btn, role) {
         secSection.style.display = "none";
     }
 }
-</script>
 
+document.querySelectorAll('[data-toggle-password]').forEach(button => {
+    button.addEventListener('click', () => {
+        const input = document.getElementById(button.dataset.togglePassword);
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+        button.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+        button.innerHTML = isHidden
+            ? '<i class="fa fa-eye-slash"></i>'
+            : '<i class="fa fa-eye"></i>';
+    });
+});
+
+const selectedRole = document.getElementById("roleInput").value;
+if (selectedRole) {
+    const selectedButton = Array.from(document.querySelectorAll(".roleBtn"))
+        .find(button => button.textContent.trim() === selectedRole);
+
+    if (selectedButton) {
+        selectRole(selectedButton, selectedRole);
+    }
+}
+	</script>

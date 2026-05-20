@@ -33,6 +33,32 @@
         #navigation li a {
             font-size: 14px !important;
         }
+
+        #navigation .people-menu .submenu {
+            background: linear-gradient(135deg, #35265f, #4a2a84, #5b21b6);
+            border: 1px solid rgba(196, 181, 253, 0.35);
+            border-radius: 14px;
+            box-shadow: 0 18px 40px rgba(46, 3, 68, 0.35);
+            overflow: hidden;
+            padding: 8px;
+        }
+
+        #navigation .people-menu .submenu li a {
+            color: #f5f3ff !important;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-weight: 600;
+        }
+
+        #navigation .people-menu .submenu li a:hover {
+            background: rgba(196, 181, 253, 0.18);
+            color: #ffffff !important;
+        }
+
+        #navigation .people-menu .submenu li a::before {
+            display: none;
+        }
+
         .login-btn {
             background: #2e0344;
             border: 2px dotted #6954c4;
@@ -105,19 +131,16 @@
                                     <li><a asp-controller="Request" asp-action="Index">Requests</a></li>
                                     <li><a asp-controller="Profile" asp-action="Index">Profile</a></li>
 
-                                    @if (isAuth && (User.IsInRole("TA") || User.IsInRole("Admin")))
+                                    @if (isAuth)
                                     {
-                                        <li><a asp-controller="Ta" asp-action="Index">TAs</a></li>
-                                    }
-
-                                    @if (isAuth && (User.IsInRole("Doctor") || User.IsInRole("Admin")))
-                                    {
-                                        <li><a asp-controller="Doctor" asp-action="Index">Doctors</a></li>
-                                    }
-
-                                    @if (isAuth && User.IsInRole("Admin"))
-                                    {
-                                        <li><a asp-controller="User" asp-action="Index" style="white-space:nowrap;">Users</a></li>
+                                        <li class="people-menu">
+                                            <a href="#">People <i class="ti-angle-down"></i></a>
+                                            <ul class="submenu">
+                                                <li><a asp-controller="Ta" asp-action="Index">TAs</a></li>
+                                                <li><a asp-controller="Doctor" asp-action="Index">Doctors</a></li>
+                                                <li><a asp-controller="User" asp-action="Students">Students</a></li>
+                                            </ul>
+                                        </li>
                                     }
 
                                 </ul>

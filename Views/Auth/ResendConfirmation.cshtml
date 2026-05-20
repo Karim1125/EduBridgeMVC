@@ -4,7 +4,7 @@
 }
 <div class="about_area"
      style="background:linear-gradient(135deg,#ede9fe,#f5f3ff); min-height:100vh; display:flex; align-items:center; justify-content:center;">
-    <div class="container" >
+    <div class="container">
         <div class="row justify-content-center">
 
             <div class="col-xl-6 col-lg-8">
@@ -18,91 +18,89 @@
                     box-shadow:0 10px 40px rgba(139,92,246,0.2);
                     position:relative;
                     overflow:hidden;
-                ">
+                    ">
 
-<!-- Glow effect -->
-<div style="
-    position:absolute;
-    width:200px;
-    height:200px;
-    background:#c4b5fd;
-    filter:blur(100px);
-    top:-50px;
-    right:-50px;
-    opacity:0.4;
-"></div>
+                    <!-- Glow effect -->
+                    <div style="
+                    position:absolute;
+                    width:200px;
+                    height:200px;
+                    background:#c4b5fd;
+                    filter:blur(100px);
+                    top:-50px;
+                    right:-50px;
+                    opacity:0.4;
+                    "></div>
 
-<h3 style="
-    text-align:center;
-    margin-bottom:30px;
-    font-size:30px;
-    font-weight:bold;
-    background: linear-gradient(90deg,#a78bfa,#8b5cf6,#7c3aed);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-">
-    Resend Confirmation Email
-</h3>
+                    <h3 style="
+                        text-align:center;
+                        margin-bottom:30px;
+                        font-size:30px;
+                        font-weight:bold;
+                        background: linear-gradient(90deg,#a78bfa,#8b5cf6,#7c3aed);
+                        -webkit-background-clip:text;
+                        -webkit-text-fill-color:transparent;
+                        ">
+                        Resend Confirmation Email
+                    </h3>
 
-<form asp-action="ResendConfirmation" method="post"
-      style="position:relative; z-index:2;">
-    <div style="margin-top:20px; position:relative;">
-        <input asp-for="Email" placeholder="Enter your email"
-                onfocus="this.style.borderBottom='2px solid #a855f7'"
-               onblur="this.style.borderBottom='2px solid #7e22ce'"
-               style="width:100%; border:none; border-bottom:2px solid #7e22ce; background:transparent; padding:10px; outline:none; color:#6b21a8;" class="form-control" />
-    </div>
+                    <form asp-action="ResendConfirmation" method="post" style="position:relative; z-index:2;">
+                        <div style="margin-top:20px; position:relative;">
+                            <input asp-for="Email" placeholder="Enter your email"
+                                   onfocus="this.style.borderBottom='2px solid #a855f7'"
+                                   onblur="this.style.borderBottom='2px solid #7e22ce'"
+                                   style="width:100%; border:none; border-bottom:2px solid #7e22ce; background:transparent; padding:10px; outline:none; color:#6b21a8;"
+                                   class="form-control" />
+                        </div>
 
-    <!-- Submit -->
-    <button type="submit"
-            onmouseover="this.style.transform='translateY(-3px) scale(1.03)'"
-            onmouseout="this.style.transform='translateY(0) scale(1)'"
-            onmousedown="this.style.transform='scale(0.95)'"
-            onmouseup="this.style.transform='scale(1.03)'"
-            style="
-                width:50%;
-                margin-top:35px;
-                margin-left:25%;
-                padding:14px;
-                border:none;
-                border-radius:15px;
-                font-weight:bold;
-                cursor:pointer;
-                background: linear-gradient(90deg,#a78bfa,#8b5cf6,#7c3aed);
-                color:white;
-                box-shadow:0 5px 20px rgba(139,92,246,0.4);
-                transition:0.3s;
-            ">
-        Send Confirmation
-    </button>
+                        <!-- Submit -->
+                        <button type="submit" onmouseover="this.style.transform='translateY(-3px) scale(1.03)'"
+                                onmouseout="this.style.transform='translateY(0) scale(1)'"
+                                onmousedown="this.style.transform='scale(0.95)'"
+                                onmouseup="this.style.transform='scale(1.03)'" style="
+                            width:50%;
+                            margin-top:35px;
+                            margin-left:25%;
+                            padding:14px;
+                            border:none;
+                            border-radius:15px;
+                            font-weight:bold;
+                            cursor:pointer;
+                            background: linear-gradient(90deg,#a78bfa,#8b5cf6,#7c3aed);
+                            color:white;
+                            box-shadow:0 5px 20px rgba(139,92,246,0.4);
+                            transition:0.3s;
+                            ">
+                            Send Confirmation
+                        </button>
 
-    <!-- Back -->
-    <div style="text-align:center; margin-top:20px;">
-        <span style="color:#7c3aed;">Back to </span>
-        <a asp-controller="Auth" asp-action="Login"
-           style="
-             background: linear-gradient(90deg,#a78bfa,#8b5cf6,#7c3aed);
-             -webkit-background-clip:text;
-             -webkit-text-fill-color:transparent;
-             font-weight:bold;
-             text-decoration:none;
-           ">
-            Login
-        </a>
-        <span style="color:#7c3aed;">Page</span>
-    </div>
+                        <!-- Back -->
+                        <div style="text-align:center; margin-top:20px;">
+                            <span style="color:#7c3aed;">Back to </span>
+                            <a asp-controller="Auth" asp-action="Login" style="
+                                background: linear-gradient(90deg,#a78bfa,#8b5cf6,#7c3aed);
+                                -webkit-background-clip:text;
+                                -webkit-text-fill-color:transparent;
+                                font-weight:bold;
+                                text-decoration:none;
+                                ">
+                                Login
+                            </a>
+                            <span style="color:#7c3aed;">Page</span>
+                        </div>
 
-    <!-- Validation -->
-    <div asp-validation-summary="All" style="color:#ef4444; margin-top:15px; text-align:center;"></div>
+                        <!-- Validation -->
+                        <div asp-validation-summary="All" style="color:#ef4444; margin-top:15px; text-align:center;">
+                        </div>
 
-    @if (TempData["Success"] != null)
-    {
-        <p style="color:#16a34a; text-align:center; margin-top:10px;">
-            @TempData["Success"]
-        </p>
-    }
+                        @if (TempData["Success"] != null)
+                        {
+                            <p style="color:#16a34a; text-align:center; margin-top:10px;">
+                                @TempData["Success"]
+                            </p>
+                        }
 
-</form>
+                    </form>
 
                 </div>
 
@@ -112,6 +110,4 @@
     </div>
 </div>
 
-<script src="~/lib/jquery/jquery.min.js"></script>
-<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-<script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+<partial name="_ValidationScriptsPartial" />

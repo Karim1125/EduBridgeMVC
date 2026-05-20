@@ -2,8 +2,6 @@
 
 @{
     ViewData["Title"] = "My Profile";
-    var allSkills = ViewBag.AllSkills as IEnumerable<EduBridgeMVC.Contracts.Skills.SkillResponse>
-                    ?? Enumerable.Empty<EduBridgeMVC.Contracts.Skills.SkillResponse>();
 }
 
 <div class="bradcam_area breadcam_bg overlay2" style="padding:150px 0;">
@@ -116,23 +114,15 @@
 
                     <!-- Add skill input -->
                     <div id="addSkillBox" style="display:none;margin-bottom:14px;">
-                        <div style="display:flex;gap:8px;align-items:center;">
-                            <input id="newSkillInput" list="skillSuggestions" placeholder="Choose or type a skill..."
+                        <div style="display:flex;gap:8px;">
+                            <input id="newSkillInput" placeholder="e.g. Python, React, SQL..."
                                    style="flex:1;padding:8px 12px;border-radius:10px;border:1px solid #a855f7;
                                    background:rgba(255,255,255,0.05);color:white;outline:none;" />
-                            <datalist id="skillSuggestions">
-                                @foreach (var skill in allSkills)
-                                {
-                                    <option value="@skill.Name"></option>
-                                }
-                            </datalist>
                             <button onclick="addSkill()"
                                     style="background:#7c3aed;color:white;border:none;padding:8px 16px;
-                                    border-radius:10px;font-weight:600;cursor:pointer;">Add</button>
+                                    border-radius:10px;font-weight:600;cursor:pointer;">Save</button>
                         </div>
-                        <p style="color:#9ca3af;font-size:12px;margin-top:6px;">
-                            Pick an existing skill from suggestions, or type a new one. Separate multiple skills with commas.
-                        </p>
+                        <p style="color:#9ca3af;font-size:12px;margin-top:6px;">Separate multiple skills with commas</p>
                     </div>
 
                     <!-- Existing skills -->
@@ -143,14 +133,10 @@
                         }
                         @foreach (var skill in Model.Skills)
                         {
-                            <span id="user-skill-@skill.Id" data-skill-name="@skill.Name" style="background:rgba(168,85,247,0.25);color:#e9d5ff;padding:5px 14px;
+                            <span style="background:rgba(168,85,247,0.25);color:#e9d5ff;padding:5px 14px;
                                 border-radius:20px;font-size:13px;font-weight:500;display:flex;
                                 align-items:center;gap:6px;">
-                                @skill.Name
-                                <button type="button" onclick="removeSkill('@skill.Id')"
-                                        title="Remove @skill.Name"
-                                        style="background:transparent;border:none;color:#fca5a5;font-weight:700;
-                                        cursor:pointer;padding:0 0 0 4px;line-height:1;">×</button>
+                                @skill
                             </span>
                         }
                     </div>
@@ -199,47 +185,26 @@ function addSkill() {
     var input = document.getElementById('newSkillInput');
     var val = input.value.trim();
     if (!val) return;
-    var currentNames = Array.from(document.querySelectorAll('[data-skill-name]'))
-        .map(el => el.getAttribute('data-skill-name').toLowerCase());
-    var skills = val.split(',')
-        .map(s => s.trim())
-        .filter(s => s)
-        .filter((s, index, arr) => arr.findIndex(x => x.toLowerCase() === s.toLowerCase()) === index)
-        .filter(s => !currentNames.includes(s.toLowerCase()));
-
-    if (skills.length === 0) {
-        showToast('Skill already exists on your profile', true);
-        return;
-    }
-
+    var skills = val.split(',').map(s => s.trim()).filter(s => s);
     fetch('/Profile/add-skills', {
         method:'POST', body:JSON.stringify(skills),
         headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'}
     }).then(r => r.json()).then(d => {
         if (d.success) {
+            var container = document.getElementById('skillsContainer');
+            var empty = container.querySelector('p');
+            if (empty) empty.remove();
+            skills.forEach(s => {
+                var span = document.createElement('span');
+                span.style.cssText = 'background:rgba(168,85,247,0.25);color:#e9d5ff;padding:5px 14px;border-radius:20px;font-size:13px;font-weight:500;';
+                span.textContent = s;
+                container.appendChild(span);
+            });
+            input.value = '';
+            document.getElementById('addSkillBox').style.display = 'none';
             showToast('Skill(s) added!');
-            setTimeout(() => window.location.reload(), 600);
         } else { showToast(d.message, true); }
     });
-}
-
-function removeSkill(skillId) {
-    fetch('/Profile/remove-skill/' + skillId, {
-        method:'POST',
-        headers:{'X-Requested-With':'XMLHttpRequest'}
-    }).then(r => r.json()).then(d => {
-        if (d.success) {
-            var el = document.getElementById('user-skill-' + skillId);
-            if (el) el.remove();
-            if (!document.querySelector('#skillsContainer span')) {
-                var p = document.createElement('p');
-                p.style.cssText = 'color:#9ca3af;font-size:14px;';
-                p.textContent = 'No skills added yet.';
-                document.getElementById('skillsContainer').appendChild(p);
-            }
-            showToast('Skill removed!');
-        } else { showToast(d.message, true); }
-    }).catch(() => showToast('Remove failed', true));
 }
 
 function showToast(msg, isError) {
